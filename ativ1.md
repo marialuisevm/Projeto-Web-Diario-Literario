@@ -1,32 +1,24 @@
-# Atividade 1 - Arquitetura de Banco de Dados e Endpoints Iniciais (Kairos)
+# Atividade 1 - Arquitetura de Banco de Dados e Endpoints Iniciais (Diário Literário)
 
 ### 1. Quais tabelas você definiu inicialmente?
 Defini três tabelas principais para suportar a regra de negócio essencial:
-* **`users`**: Armazena as informações dos usuários cadastrados (id, nome, e-mail, senha criptografada e data de criação).
-* **`habits`**: Contém os hábitos criados (id, chave estrangeira do usuário, título, descrição, categoria, frequência e data de criação).
-* **`habit_logs`**: Registra o histórico diário de realização de cada hábito (id, chave estrangeira do hábito, data do check-in e status de conclusão).
-
----
+- **`users`:** Armazena as informações dos leitores cadastrados (`id`, `nome`, `email`, `senha_hash` e `created_at`).
+- **`books`:** Armazena os livros da biblioteca pessoal (`id`, `user_id` como chave estrangeira, `titulo`, `autor`, `genero`, `total_paginas`, `status` [*"quero_ler"*, *"lendo"*, *"lido"*] e `created_at`).
+- **`reading_logs`:** Registra o progresso e avaliações de cada obra (`id`, `book_id` como chave estrangeira, `pagina_atual`, `data_inicio`, `data_conclusao`, `nota` [1 a 5], `resenha` e `updated_at`).
 
 ### 2. Você utilizou migrations? Se sim, quantas migrations? Descreva em uma frase o que cada uma faz.
-Sim, utilizei apenas 1 migration inicial (`database/migrations/001_initial_tables.py`):
-* **Migration 1 (`001_initial_tables.py`)**: Cria toda a estrutura relacional inicial contendo as tabelas `users`, `habits` e `habit_logs` com suas respectivas chaves estrangeiras e restrições.
-
----
+Sim, utilizei 1 migration inicial (`src/database/migrations/001_create_initial_tables.ts`):
+- **Migration 1 (`001_create_initial_tables.ts`):** Cria a estrutura relacional inicial das tabelas `users`, `books` e `reading_logs`, configurando chaves primárias, índices, chaves estrangeiras com integridade referencial e valores padrão.
 
 ### 3. Qual o caminho do arquivo que gera a seed do seu banco?
-`database/seeds.py`
-
----
+`src/database/seeds.ts`
 
 ### 4. Quais os endpoints que você irá implementar inicialmente?
-* `POST /auth/register` - Criação de conta de usuário.
-* `POST /auth/login` - Autenticação e emissão de token de acesso (JWT).
-* `GET /habits` - Listagem dos hábitos pertencentes ao usuário autenticado.
-* `POST /habits` - Cadastro de um novo hábito.
-* `POST /habits/{id}/check` - Marcação ou desmarcação do hábito para a data informada.
-
----
+- `POST /auth/register` — Criação de conta do usuário/leitor.
+- `POST /auth/login` — Autenticação e emissão do token JWT.
+- `GET /books` — Listagem dos livros do usuário autenticado (com suporte a filtros por status).
+- `POST /books` — Cadastro de um novo livro no acervo pessoal.
+- `PATCH /books/:id/progress` — Atualização do progresso de leitura (página atual, alteração de status e datas).
 
 ### 5. Você está usando algum framework para escrever os endpoints da sua API? Se sim, qual?
-Sim. Utilizei o **FastAPI** sobre a linguagem **Python**. O framework foi escolhido pela alta produtividade, validação automática de dados via Pydantic e geração nativa de documentação interativa (Swagger/OpenAPI), o que acelera o teste e a integração com as aplicações cliente.
+Sim. Utilizei o **Fastify** com **TypeScript**. A escolha pelo ecossistema TypeScript com Fastify se deu pela tipagem estática ponta a ponta, alto desempenho de I/O, segurança em tempo de compilação e integração facilitada com bibliotecas de validação de schemas (como Zod ou TypeBox), além de simplificar a geração de documentação de rotas com Swagger/OpenAPI.
