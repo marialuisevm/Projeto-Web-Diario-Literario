@@ -1,6 +1,6 @@
-# 📚 ReadTrack — Gerenciador Pessoal de Leitura
+# 📚 Diário Literário — Gerenciador Pessoal de Leitura
 
-O **ReadTrack** é um aplicativo desenvolvido para ajudar leitores a organizarem suas leituras, acompanharem metas diárias e manterem um registro estruturado de livros lidos e resenhas.
+O **Diário Literário** é um aplicativo desenvolvido para ajudar leitores a organizarem suas leituras, acompanharem metas diárias e manterem um registro estruturado de livros lidos e resenhas.
 
 ---
 
@@ -14,7 +14,7 @@ O **ReadTrack** é um aplicativo desenvolvido para ajudar leitores a organizarem
 
 ---
 
-## 🛠️ Tecnologias Recomendadas
+## 🛠️ Tecnologias Utilizadas
 
 - **Front-end:** React / React Native ou Flutter
 - **Back-end:** Node.js (Express / Fastify) ou Python (FastAPI)
