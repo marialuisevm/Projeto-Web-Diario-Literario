@@ -1,28 +1,35 @@
-# Kairós - Gestor de Hábitos Diários
+# 📚 ReadTrack — Gerenciador Pessoal de Leitura
 
-## Resumo do Projeto
-O Kairós é uma aplicação para acompanhamento de metas e rotinas diárias. O objetivo é permitir que os usuários criem hábitos, acompanhem sua frequência diária e visualizem estatísticas de consistência ao longo do tempo. A plataforma conta com um aplicativo Mobile nativo para marcação rápida de tarefas no dia a dia e uma interface Web voltada para gestão de hábitos e visualização de relatórios.
+O **ReadTrack** é um aplicativo desenvolvido para ajudar leitores a organizarem suas leituras, acompanharem metas diárias e manterem um registro estruturado de livros lidos e resenhas.
 
-## Funcionalidades
+---
 
-### Autenticação e Usuário
-* Cadastro e login de usuários (Web e Mobile).
-* Edição de perfil básico e preferências.
+## 🚀 Funcionalidades
 
-### Gestão de Hábitos
-* Criação, edição e exclusão de hábitos (ex.: "Beber 2L de água", "Ler 15 min", "Exercício").
-* Definição de frequência (diária ou dias específicos da semana).
-* Categorização de hábitos por tags/cores (ex.: Saúde, Estudo, Produtividade).
+- **👤 Perfil e Autenticação:** Criação de conta, login seguro e gestão de perfil.
+- **📖 Catálogo de Livros:** Cadastro completo de obras (título, autor, gênero e número de páginas) com busca rápida.
+- **📊 Progresso Visual:** Atualização de páginas lidas com cálculo automático de porcentagem e barra de progresso.
+- **📌 Fluxo e Histórico:** Lista de leitura (*Quero Ler*, *Lendo*, *Lido*) para planejar próximas leituras e arquivar livros terminados.
+- **⭐ Resenhas e Métricas:** Avaliação de 1 a 5 estrelas, comentários críticos e resumo estatístico (páginas lidas e livros concluídos).
 
-### Registro e Check-in (Core Mobile)
-* Lista diária de hábitos para marcação simples (check/uncheck).
-* Contador de ofensivas/sequência de dias consecutivos (streaks).
+---
 
-### Relatórios e Histórico (Core Web)
-* Painel com calendário visual mostrando os dias concluídos.
-* Gráfico de taxa de conclusão semanal e mensal.
+## 🛠️ Tecnologias Recomendadas
 
-## Tecnologias Propostas
-* **Backend:** Node.js (Express ou NestJS) com SQLite/PostgreSQL.
-* **Frontend Web:** React (Vite).
-* **Frontend Mobile:** React Native (Expo).
+- **Front-end:** React / React Native ou Flutter
+- **Back-end:** Node.js (Express / Fastify) ou Python (FastAPI)
+- **Banco de Dados:** PostgreSQL ou SQLite (para armazenamento local/mobile)
+- **Autenticação:** JWT (JSON Web Tokens)
+
+---
+
+## 📦 Estrutura do Projeto
+
+```text
+├── src/
+│   ├── controllers/      # Regras de negócio e rotas
+│   ├── models/           # Modelos de dados (User, Book, Review, Progress)
+│   ├── services/         # Cálculos de progresso e estatísticas
+│   └── views/            # Telas e componentes da interface
+├── tests/                # Testes unitários e de integração
+└── README.md
