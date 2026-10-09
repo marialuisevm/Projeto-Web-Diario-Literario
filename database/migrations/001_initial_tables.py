@@ -1,52 +1,58 @@
-"""
-Migration inicial - Criação das tabelas base do Kairos
-Arquivo: database/migrations/001_initial_tables.py
-"""
-from alembic import op
-import sqlalchemy as sa
+/**
+ * Migration inicial - Criação das tabelas base do Diário Literário
+ * Arquivo: src/database/migrations/001_create_initial_tables.ts
+ */
+import { Knex } from 'knex';
 
-# Identificadores da migration
-revision = '001_initial_tables'
-down_revision = None
-branch_labels = None
-depends_on = None
+export async function up(knex: Knex): Promise<void> {
+  // 1. Tabela de Usuários/Leitores
+  await knex.schema.createTable('users', (table) => {
+    table.increments('id').primary();
+    table.string('nome', 100).notNullable();
+    table.string('email', 150).notNullable().unique();
+    table.string('senha_hash', 255).notNullable();
+    table.timestamp('created_at').defaultTo(knex.fn.now());
+  });
 
+  // 2. Tabela de Livros (Usuário)
+  await knex.schema.createTable('books', (table) => {
+    table.increments('id').primary();
+    table
+      .integer('user_id')
+      .unsigned()
+      .notNullable()
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
+    table.string('titulo', 150).notNullable();
+    table.string('autor', 100).notNullable();
+    table.string('genero', 50).nullable();
+    table.integer('total_paginas').notNullable();
+    table.string('status', 20).notNullable().defaultTo('quero_ler'); // 'quero_ler', 'lendo', 'lido'
+    table.timestamp('created_at').defaultTo(knex.fn.now());
+  });
 
-def upgrade() -> None:
-    # 1. Tabela de Usuários
-    op.create_table(
-        'users',
-        sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-        sa.Column('name', sa.String(length=100), nullable=False),
-        sa.Column('email', sa.String(length=150), nullable=False, unique=True),
-        sa.Column('password_hash', sa.String(length=255), nullable=False),
-        sa.Column('created_at', sa.DateTime(), server_default=sa.func.now())
-    )
+  // 3. Tabela de Registros de Leitura e Avaliações (Livro)
+  await knex.schema.createTable('reading_logs', (table) => {
+    table.increments('id').primary();
+    table
+      .integer('book_id')
+      .unsigned()
+      .notNullable()
+      .references('id')
+      .inTable('books')
+      .onDelete('CASCADE');
+    table.integer('pagina_atual').notNullable().defaultTo(0);
+    table.date('data_inicio').nullable();
+    table.date('data_conclusao').nullable();
+    table.integer('nota').nullable(); // 1 a 5
+    table.text('resenha').nullable();
+    table.timestamp('updated_at').defaultTo(knex.fn.now());
+  });
+}
 
-    # 2. Tabela de Hábitos (vinculada ao Usuário)
-    op.create_table(
-        'habits',
-        sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-        sa.Column('user_id', sa.Integer(), sa.ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
-        sa.Column('title', sa.String(length=100), nullable=False),
-        sa.Column('description', sa.Text(), nullable=True),
-        sa.Column('category', sa.String(length=50), nullable=True),
-        sa.Column('frequency', sa.String(length=50), server_default='daily'),
-        sa.Column('created_at', sa.DateTime(), server_default=sa.func.now())
-    )
-
-    # 3. Tabela de Histórico/Check-in diário (vinculada ao Hábito)
-    op.create_table(
-        'habit_logs',
-        sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-        sa.Column('habit_id', sa.Integer(), sa.ForeignKey('habits.id', ondelete='CASCADE'), nullable=False),
-        sa.Column('completed_at', sa.Date(), nullable=False),
-        sa.Column('status', sa.Boolean(), default=True)
-    )
-
-
-def downgrade() -> None:
-    # Caso precise reverter a migration, apaga na ordem inversa
-    op.drop_table('habit_logs')
-    op.drop_table('habits')
-    op.drop_table('users')
+export async function down(knex: Knex): Promise<void> {
+  await knex.schema.dropTableIfExists('reading_logs');
+  await knex.schema.dropTableIfExists('books');
+  await knex.schema.dropTableIfExists('users');
+}
