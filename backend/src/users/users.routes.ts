@@ -4,10 +4,10 @@ import { requireAuth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// Rota pública: Registo de conta
+// Registo de novo utilizador (Público)
 router.post("/api/users", usersController.register);
 
-// Rota protegida: Consultar dados do próprio utilizador logado
+// Perfil do utilizador autenticado (Protegido por Token JWT)
 router.get("/api/users/me", requireAuth, usersController.getMe);
 
 export default router;
