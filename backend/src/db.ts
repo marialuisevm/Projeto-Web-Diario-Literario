@@ -1,4 +1,9 @@
 import { Pool } from "pg";
-import { config } from "./config";
+import { loadConfig } from "./config";
 
-export const pool = new Pool({ connectionString: config.databaseUrl });
+const config = loadConfig();
+
+export const pool = new Pool({
+  connectionString: config.databaseUrl,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+});
