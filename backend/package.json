@@ -1,0 +1,47 @@
+{
+  "name": "projeto-web-diario-literario",
+  "version": "1.0.0",
+  "description": "O **Diário Literário** é um aplicativo desenvolvido para ajudar leitores a organizarem suas leituras, acompanharem metas diárias e manterem um registro estruturado de livros lidos e resenhas.",
+  "main": "index.js",
+ 
+  "scripts": {
+  "dev": "tsx watch src/app.ts",
+  "migrate": "tsx migrate.ts",
+  "build": "tsc",
+  "start": "node dist/src/app.js"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marialuisevm/Projeto-Web-Diario-Literario.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/marialuisevm/Projeto-Web-Diario-Literario/issues"
+  },
+  "homepage": "https://github.com/marialuisevm/Projeto-Web-Diario-Literario#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
