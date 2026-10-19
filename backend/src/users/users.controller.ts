@@ -10,16 +10,11 @@ export async function register(req: Request, res: Response, next: NextFunction) 
       return next(new AppError("Campos obrigatórios: name, email e password.", 400, "VALIDATION_ERROR"));
     }
 
-    const newUser = await usersService.register({ name, email, password });
+    const createdUser = await usersService.register({ name, email, password });
 
     res.status(201).json({
-      message: "Utilizador criado com sucesso!",
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        createdAt: newUser.createdAt,
-      },
+      message: "Conta criada com sucesso!",
+      user: createdUser,
     });
   } catch (error) {
     next(error);
@@ -29,14 +24,9 @@ export async function register(req: Request, res: Response, next: NextFunction) 
 export async function getMe(req: Request, res: Response, next: NextFunction) {
   try {
     const userId = (req as any).userId;
-    const user = await usersService.getProfile(userId);
+    const profile = await usersService.getProfile(userId);
 
-    res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      createdAt: user.createdAt,
-    });
+    res.status(200).json(profile);
   } catch (error) {
     next(error);
   }
