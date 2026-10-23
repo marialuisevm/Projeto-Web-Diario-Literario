@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import * as usersRepository from "./users.repository";
-import { AppError } from "../errors/AppError";
+import { AppError } from "../errors/appError";
 
 export interface RegisterDTO {
   name: string;

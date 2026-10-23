@@ -1,6 +1,6 @@
 import * as leiturasRepository from "./leituras.repository";
 import { pool } from "../db";
-import { AppError } from "../errors/AppError";
+import { AppError } from "../errors/appError";
 
 function formatLeituraComProgresso(item: leiturasRepository.LeituraRow) {
   const total = item.total_paginas ?? 1;

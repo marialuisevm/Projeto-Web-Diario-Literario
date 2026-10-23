@@ -1,5 +1,5 @@
 import * as livrosRepository from "./livros.repository";
-import { AppError } from "../errors/AppError";
+import { AppError } from "../errors/appError";
 
 export interface LivroInput {
   titulo: string;
