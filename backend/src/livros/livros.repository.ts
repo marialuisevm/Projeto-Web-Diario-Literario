@@ -73,3 +73,13 @@ export async function remove(id: number): Promise<boolean> {
   const result = await pool.query("DELETE FROM livros WHERE id = $1;", [id]);
   return (result.rowCount ?? 0) > 0;
 }
+export async function updateCapa(id: number, capaUrl: string): Promise<LivroRow | null> {
+  const query = `
+    UPDATE livros
+    SET capa_url = $1
+    WHERE id = $2
+    RETURNING *;
+  `;
+  const result = await pool.query(query, [capaUrl, id]);
+  return result.rows[0] ?? null;
+}
