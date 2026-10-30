@@ -84,7 +84,11 @@ export async function updateProgress(
 ): Promise<LeituraRow | null> {
   const query = `
     UPDATE leituras
-    SET paginas_lidas = $1, status = $2, data_fim = $3
+    SET paginas_lidas = $1, status = $2, data_fim = $3,
+        data_inicio = CASE
+          WHEN $2::varchar IN ('LENDO', 'LIDO') THEN COALESCE(data_inicio, CURRENT_DATE)
+          ELSE data_inicio
+        END
     WHERE id = $4 AND user_id = $5
     RETURNING *;
   `;

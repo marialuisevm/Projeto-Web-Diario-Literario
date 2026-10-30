@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { loadConfig } from "./config";
 import { errorHandler } from "./errors/errorHandler";
 import { AppError } from "./errors/appError";
@@ -15,6 +16,9 @@ import metasRoutes from "./metas/metas.routes";
 
 const config = loadConfig();
 const app = express();
+
+// Permite que o front-end (outro endereço) acesse a API
+app.use(cors());
 
 // Middleware para interpretar requisições em formato JSON
 app.use(express.json());
