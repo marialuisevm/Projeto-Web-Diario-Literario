@@ -19,6 +19,9 @@ const app = express();
 // Middleware para interpretar requisições em formato JSON
 app.use(express.json());
 
+// Deixa as imagens da pasta uploads acessíveis por URL (antes das rotas protegidas)
+app.use("/uploads", express.static("uploads"));
+
 // Rota de verificação do estado da API
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "API Diário Literário online!" });
