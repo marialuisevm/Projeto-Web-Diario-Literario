@@ -1,6 +1,6 @@
 import * as resenhasRepository from "./resenhas.repository";
 import * as leiturasRepository from "../leituras/leituras.repository";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 
 export interface ResenhaInput {
   leituraId: number;

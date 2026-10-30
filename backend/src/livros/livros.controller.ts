@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as livrosService from "./livros.service";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 import fs from "fs";
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
@@ -84,6 +84,31 @@ export async function uploadCapa(req: Request, res: Response, next: NextFunction
     if (arquivo) {
       fs.unlink(arquivo.path, () => {});
     }
+    next(error);
+  }
+}
+
+export async function update(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return next(new AppError("ID de livro inválido.", 400, "INVALID_ID"));
+    }
+
+    const { titulo, autor, totalPaginas, generoId } = req.body;
+
+    const livro = await livrosService.update(id, {
+      titulo,
+      autor,
+      totalPaginas: Number(totalPaginas),
+      generoId: generoId ? Number(generoId) : null,
+    });
+
+    res.status(200).json({
+      message: "Livro atualizado com sucesso!",
+      livro,
+    });
+  } catch (error) {
     next(error);
   }
 }

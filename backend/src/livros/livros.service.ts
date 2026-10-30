@@ -1,5 +1,6 @@
 import * as livrosRepository from "./livros.repository";
-import { AppError } from "../errors/appError";
+import * as generosRepository from "../generos/generos.repository";
+import { AppError } from "../errors/AppError";
 
 export interface LivroInput {
   titulo: string;
@@ -57,5 +58,38 @@ export async function updateCapa(id: number, capaUrl: string) {
   if (!livro) {
     throw new AppError("Livro não encontrado.", 404, "NOT_FOUND");
   }
+  return livro;
+}
+export async function update(id: number, input: LivroInput) {
+  if (!input.titulo || input.titulo.trim() === "") {
+    throw new AppError("O título do livro é obrigatório.", 400, "VALIDATION_ERROR");
+  }
+
+  if (!input.autor || input.autor.trim() === "") {
+    throw new AppError("O autor do livro é obrigatório.", 400, "VALIDATION_ERROR");
+  }
+
+  if (!input.totalPaginas || input.totalPaginas <= 0) {
+    throw new AppError("O número total de páginas deve ser superior a zero.", 400, "VALIDATION_ERROR");
+  }
+
+  if (input.generoId) {
+    const genero = await generosRepository.findById(input.generoId);
+    if (!genero) {
+      throw new AppError("Gênero não encontrado.", 404, "GENERO_NOT_FOUND");
+    }
+  }
+
+  const livro = await livrosRepository.update(id, {
+    titulo: input.titulo.trim(),
+    autor: input.autor.trim(),
+    total_paginas: input.totalPaginas,
+    genero_id: input.generoId ?? null,
+  });
+
+  if (!livro) {
+    throw new AppError("Livro não encontrado.", 404, "NOT_FOUND");
+  }
+
   return livro;
 }

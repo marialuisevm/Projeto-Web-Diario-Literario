@@ -1,5 +1,5 @@
 import * as metasRepository from "./metas.repository";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 
 export interface MetaInput {
   ano: number;

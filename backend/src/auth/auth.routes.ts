@@ -1,9 +1,9 @@
 import { Router } from "express";
+import * as authController from "./auth.controller";
 
 const router = Router();
 
-// As rotas de login e registo podem ser ligadas aqui posteriormente:
-// router.post("/login", authController.login);
-// router.post("/register", authController.register);
+// Login (Público): devolve o token JWT usado nas rotas protegidas
+router.post("/api/auth/login", authController.login);
 
 export default router;
