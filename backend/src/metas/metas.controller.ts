@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as metasService from "./metas.service";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 
 // Lista todas as metas do usuário cada uma com seu progresso
 export async function getAll(req: Request, res: Response, next: NextFunction) {

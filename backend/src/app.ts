@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { loadConfig } from "./config";
 import { errorHandler } from "./errors/errorHandler";
-import { AppError } from "./errors/appError";
+import { AppError } from "./errors/AppError";
 
 // Importação das rotas dos módulos
 import authRoutes from "./auth/auth.routes";

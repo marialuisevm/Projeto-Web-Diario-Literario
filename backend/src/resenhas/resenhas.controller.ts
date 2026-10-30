@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as resenhasService from "./resenhas.service";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 
 // Lista as resenhas do usuário
 export async function getAll(req: Request, res: Response, next: NextFunction) {
