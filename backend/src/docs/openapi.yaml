@@ -1,0 +1,113 @@
+openapi: 3.0.3
+info:
+  title: Diário Literário API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Erro:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string, example: NOT_FOUND }
+            message: { type: string, example: Recurso não encontrado. }
+    MetaProgresso:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        ano: { type: integer, example: 2026 }
+        metaLivros: { type: integer, example: 10 }
+        livrosLidos: { type: integer, example: 6 }
+        faltam: { type: integer, example: 4 }
+        porcentagem: { type: integer, example: 60 }
+        concluida: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time, example: "2026-10-29T14:22:21.000Z" }
+    Resenha:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        leituraId: { type: integer, example: 3 }
+        livroId: { type: integer, example: 5 }
+        titulo: { type: string, example: Dom Casmurro }
+        autor: { type: string, example: Machado de Assis }
+        capaUrl: { type: string, nullable: true, example: "https://exemplo.com/capa.jpg" }
+        avaliacao: { type: integer, minimum: 1, maximum: 5, example: 5 }
+        comentario: { type: string, nullable: true, example: Um clássico imperdível. }
+        createdAt: { type: string, format: date-time, example: "2026-10-29T14:22:21.000Z" }
+    Leitura:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        livroId: { type: integer, example: 5 }
+        titulo: { type: string, example: Dom Casmurro }
+        autor: { type: string, example: Machado de Assis }
+        totalPaginas: { type: integer, example: 256 }
+        capaUrl: { type: string, nullable: true, example: "https://exemplo.com/capa.jpg" }
+        paginasLidas: { type: integer, example: 128 }
+        porcentagem: { type: integer, example: 50 }
+        status: { type: string, enum: [QUERO_LER, LENDO, LIDO], example: LENDO }
+        dataInicio: { type: string, format: date-time, nullable: true, example: "2026-10-30T10:00:00.000Z" }
+        dataFim: { type: string, format: date-time, nullable: true, example: null }
+        createdAt: { type: string, format: date-time, example: "2026-10-30T10:00:00.000Z" }
+    LeituraRegistro:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        user_id: { type: integer, example: 2 }
+        livro_id: { type: integer, example: 5 }
+        paginas_lidas: { type: integer, example: 0 }
+        status: { type: string, enum: [QUERO_LER, LENDO, LIDO], example: QUERO_LER }
+        data_inicio: { type: string, format: date-time, nullable: true, example: null }
+        data_fim: { type: string, format: date-time, nullable: true, example: null }
+        created_at: { type: string, format: date-time, example: "2026-10-30T10:00:00.000Z" }
+    Usuario:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: Maria Silva }
+        email: { type: string, example: maria@exemplo.com }
+        createdAt: { type: string, format: date-time, example: "2026-10-30T03:30:00.000Z" }
+    Livro:
+      type: object
+      properties:
+        id: { type: integer, example: 5 }
+        titulo: { type: string, example: Dom Casmurro }
+        autor: { type: string, example: Machado de Assis }
+        total_paginas: { type: integer, example: 256 }
+        genero_id: { type: integer, nullable: true, example: 2 }
+        genero_nome: { type: string, nullable: true, example: Romance }
+        capa_url: { type: string, nullable: true, example: "https://exemplo.com/capa.jpg" }
+        created_at: { type: string, format: date-time, example: "2026-10-30T10:00:00.000Z" }
+    LivroRegistro:
+      type: object
+      properties:
+        id: { type: integer, example: 5 }
+        titulo: { type: string, example: Dom Casmurro }
+        autor: { type: string, example: Machado de Assis }
+        total_paginas: { type: integer, example: 256 }
+        genero_id: { type: integer, nullable: true, example: 2 }
+        capa_url: { type: string, nullable: true, example: "https://exemplo.com/capa.jpg" }
+        created_at: { type: string, format: date-time, example: "2026-10-30T10:00:00.000Z" }
+  responses:
+    NaoAutorizado:
+      description: Token ausente, em formato inválido, expirado ou inválido
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code: { type: string, example: UNAUTHORIZED }
+                  message: { type: string, example: Token de autenticação não fornecido. }
+security:
+  - bearerAuth: []

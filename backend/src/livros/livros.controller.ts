@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as livrosService from "./livros.service";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {

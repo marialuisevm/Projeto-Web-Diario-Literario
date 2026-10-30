@@ -1,0 +1,90 @@
+paths:
+  /api/auth/register:
+    post:
+      tags: [Autenticação]
+      summary: Cadastra um novo usuário
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome, email, senha]
+              properties:
+                nome:
+                  type: string
+                  example: Maria Silva
+                email:
+                  type: string
+                  example: maria@exemplo.com
+                senha:
+                  type: string
+                  example: uma_senha_forte
+      responses:
+        "201":
+          description: Usuário criado (a senha não é devolvida)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer, example: 1 }
+                  name: { type: string, example: Maria Silva }
+                  email: { type: string, example: maria@exemplo.com }
+                  created_at: { type: string, format: date-time, example: "2026-10-30T03:30:00.000Z" }
+        "400":
+          description: Nome, email ou senha ausentes (`VALIDATION_ERROR`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: Já existe um usuário com este e-mail (`USER_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Faz login e devolve o token JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, senha]
+              properties:
+                email:
+                  type: string
+                  example: maria@exemplo.com
+                senha:
+                  type: string
+                  example: uma_senha_forte
+      responses:
+        "200":
+          description: Login realizado. O token deve ser enviado nas rotas protegidas (botão Authorize)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuario:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 1 }
+                      nome: { type: string, example: Maria Silva }
+                      email: { type: string, example: maria@exemplo.com }
+                  token: { type: string, example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
+        "400":
+          description: Email ou senha ausentes (`VALIDATION_ERROR`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          description: E-mail ou senha inválidos (`INVALID_CREDENTIALS`). A mesma resposta vale para e-mail inexistente e senha errada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }

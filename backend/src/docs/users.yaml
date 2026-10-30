@@ -1,0 +1,66 @@
+paths:
+  /api/users:
+    post:
+      tags: [Usuários]
+      summary: Cria uma conta de usuário
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                  example: Maria Silva
+                email:
+                  type: string
+                  example: maria@exemplo.com
+                password:
+                  type: string
+                  minLength: 6
+                  description: Mínimo de 6 caracteres
+                  example: uma_senha_forte
+      responses:
+        "201":
+          description: Conta criada (a senha não é devolvida)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Conta criada com sucesso! }
+                  user: { $ref: "#/components/schemas/Usuario" }
+        "400":
+          description: |
+            Requisição inválida (`VALIDATION_ERROR`). Possíveis causas:
+            - name, email ou password ausentes
+            - password com menos de 6 caracteres
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: Já existe uma conta com este e-mail (`EMAIL_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/users/me:
+    get:
+      tags: [Usuários]
+      summary: Mostra o perfil do usuário autenticado
+      responses:
+        "200":
+          description: Dados do usuário dono do token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Usuario" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: O usuário do token não existe mais (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }

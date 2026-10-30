@@ -1,0 +1,184 @@
+paths:
+  /api/leituras:
+    get:
+      tags: [Leituras]
+      summary: Lista as leituras do usuário
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [QUERO_LER, LENDO, LIDO]
+          description: Filtra as leituras por status
+          example: LIDO
+      responses:
+        "200":
+          description: Lista de leituras com os dados do livro e a porcentagem lida, da mais recente para a mais antiga
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Leitura"
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+
+    post:
+      tags: [Leituras]
+      summary: Adiciona um livro à lista de leituras do usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [livroId]
+              properties:
+                livroId:
+                  type: integer
+                  description: Id de um livro do catálogo
+                  example: 5
+                status:
+                  type: string
+                  enum: [QUERO_LER, LENDO, LIDO]
+                  default: QUERO_LER
+                  description: Opcional. Se for LENDO, a data de início é preenchida automaticamente
+                  example: QUERO_LER
+      responses:
+        "201":
+          description: Livro adicionado à lista (devolve o registro como está no banco)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Livro adicionado à sua lista! }
+                  leitura: { $ref: "#/components/schemas/LeituraRegistro" }
+        "400":
+          description: Campo livroId ausente (`VALIDATION_ERROR`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Livro não encontrado no catálogo (`BOOK_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: O usuário já adicionou este livro à lista (`ALREADY_IN_LIST`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/leituras/{id}:
+    get:
+      tags: [Leituras]
+      summary: Busca uma leitura pelo id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da leitura
+          example: 1
+      responses:
+        "200":
+          description: Leitura encontrada, com os dados do livro e a porcentagem lida
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Leitura" }
+        "400":
+          description: Id inválido (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Leitura não encontrada (`NOT_FOUND`). Também ocorre quando a leitura pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    delete:
+      tags: [Leituras]
+      summary: Remove uma leitura da lista
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da leitura
+          example: 1
+      responses:
+        "204":
+          description: Leitura removida (sem corpo na resposta)
+        "400":
+          description: Id inválido (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Leitura não encontrada (`NOT_FOUND`). Também ocorre quando a leitura pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/leituras/{id}/progresso:
+    patch:
+      tags: [Leituras]
+      summary: Atualiza as páginas lidas de uma leitura
+      description: |
+        Atualiza as páginas lidas e ajusta o status automaticamente:
+        - páginas lidas igual ao total de páginas do livro: status `LIDO` e a data de fim é preenchida
+        - maior que zero e menor que o total: status `LENDO`
+        - zero: o status atual é mantido
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da leitura
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paginasLidas]
+              properties:
+                paginasLidas:
+                  type: integer
+                  description: Total de páginas lidas, de 0 até o número de páginas do livro
+                  example: 128
+      responses:
+        "200":
+          description: Progresso atualizado (devolve o registro como está no banco)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Progresso atualizado com sucesso! }
+                  leitura: { $ref: "#/components/schemas/LeituraRegistro" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: id inválido ou campo paginasLidas ausente
+            - `INVALID_PAGE_COUNT`: as páginas lidas devem estar entre 0 e o total de páginas do livro
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Leitura não encontrada (`NOT_FOUND`). Também ocorre quando a leitura pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
