@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { loadConfig } from "./config";
 import { errorHandler } from "./errors/errorHandler";
 import { AppError } from "./errors/AppError";
@@ -20,8 +21,14 @@ import metasRoutes from "./metas/metas.routes";
 const config = loadConfig();
 const app = express();
 
+// Permite que o front-end (outro endereço) acesse a API
+app.use(cors());
+
 // Middleware para interpretar requisições em formato JSON
 app.use(express.json());
+
+// Deixa as imagens da pasta uploads acessíveis por URL (antes das rotas protegidas)
+app.use("/uploads", express.static("uploads"));
 
 // Rota de verificação do estado da API
 app.get("/health", (req: Request, res: Response) => {

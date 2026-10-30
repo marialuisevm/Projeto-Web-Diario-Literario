@@ -51,3 +51,11 @@ export async function remove(id: number) {
     throw new AppError("Livro não encontrado para remoção.", 404, "NOT_FOUND");
   }
 }
+
+export async function updateCapa(id: number, capaUrl: string) {
+  const livro = await livrosRepository.updateCapa(id, capaUrl);
+  if (!livro) {
+    throw new AppError("Livro não encontrado.", 404, "NOT_FOUND");
+  }
+  return livro;
+}

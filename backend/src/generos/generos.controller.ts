@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as generosService from "./generos.service";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 
 // Lê o parâmetro opcional da query string, passa pro service e responde
 export async function getAll(req: Request, res: Response, next: NextFunction) {
