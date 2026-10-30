@@ -1,0 +1,276 @@
+{
+	"info": {
+		"_postman_id": "c1f83a42-7e9b-4b10-a29d-diarioliterario",
+		"name": "Diário Literário - API (Testes Mallu)",
+		"description": "Coleção de testes e documentação dos módulos de Autenticação, Usuários, Livros e Leituras.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "POST Registrar Usuário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Maria Luise\",\n  \"email\": \"mallu@email.com\",\n  \"senha\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/auth/register",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["auth", "register"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 201 Created",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"id\": 3,\n  \"nome\": \"Maria Luise\",\n  \"email\": \"mallu@email.com\",\n  \"created_at\": \"2026-10-27T12:00:00.000Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "POST Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"mallu@email.com\",\n  \"senha\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/auth/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["auth", "login"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"usuario\": {\n    \"id\": 3,\n    \"nome\": \"Maria Luise\",\n    \"email\": \"mallu@email.com\"\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJtYWxsdUBlbWFpbC5jb20ifQ...\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "GET Listar Usuários",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/users",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["users"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "[\n  {\n    \"id\": 1,\n    \"nome\": \"Ana Silva\",\n    \"email\": \"ana@email.com\"\n  },\n  {\n    \"id\": 2,\n    \"nome\": \"Carlos Souza\",\n    \"email\": \"carlos@email.com\"\n  }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Livros",
+			"item": [
+				{
+					"name": "GET Listar Livros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/livros",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["livros"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "[\n  {\n    \"id\": 1,\n    \"titulo\": \"Dom Casmurro\",\n    \"autor\": \"Machado de Assis\",\n    \"paginas\": 256,\n    \"genero_id\": 1\n  },\n  {\n    \"id\": 2,\n    \"titulo\": \"O Hobbit\",\n    \"autor\": \"J.R.R. Tolkien\",\n    \"paginas\": 310,\n    \"genero_id\": 2\n  }\n]"
+						}
+					]
+				},
+				{
+					"name": "GET Livro por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/livros/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["livros", "1"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"id\": 1,\n  \"titulo\": \"Dom Casmurro\",\n  \"autor\": \"Machado de Assis\",\n  \"paginas\": 256,\n  \"genero_id\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "POST Criar Livro",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titulo\": \"1984\",\n  \"autor\": \"George Orwell\",\n  \"paginas\": 326,\n  \"genero_id\": 3\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/livros",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["livros"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 201 Created",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"id\": 6,\n  \"titulo\": \"1984\",\n  \"autor\": \"George Orwell\",\n  \"paginas\": 326,\n  \"genero_id\": 3\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Leituras",
+			"item": [
+				{
+					"name": "GET Listar Leituras",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/leituras",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["leituras"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 200 OK",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "[\n  {\n    \"id\": 1,\n    \"user_id\": 1,\n    \"livro_id\": 1,\n    \"status\": \"LENDO\",\n    \"paginas_lidas\": 120\n  }\n]"
+						}
+					]
+				},
+				{
+					"name": "POST Iniciar Leitura",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"livro_id\": 2,\n  \"status\": \"LENDO\",\n  \"paginas_lidas\": 0\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/leituras",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["leituras"]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo 201 Created",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n  \"id\": 4,\n  \"user_id\": 3,\n  \"livro_id\": 2,\n  \"status\": \"LENDO\",\n  \"paginas_lidas\": 0\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}
