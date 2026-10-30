@@ -2,7 +2,11 @@ import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
 import { loadConfig } from "./config";
 import { errorHandler } from "./errors/errorHandler";
-import { AppError } from "./errors/appError";
+import { AppError } from "./errors/AppError";
+import swaggerUi from "swagger-ui-express";
+import fs from "fs";
+import path from "path";
+import YAML from "yaml";
 
 // Importação das rotas dos módulos
 import authRoutes from "./auth/auth.routes";
@@ -23,6 +27,19 @@ app.use(express.json());
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "API Diário Literário online!" });
 });
+
+// Documentação Swagger
+const docsDir = path.join(__dirname, "docs");
+const spec = YAML.parse(fs.readFileSync(path.join(docsDir, "openapi.yaml"), "utf8"));
+
+spec.paths = {};
+for (const file of fs.readdirSync(docsDir)) {
+  if (file === "openapi.yaml" || !file.endsWith(".yaml")) continue;
+  const mod = YAML.parse(fs.readFileSync(path.join(docsDir, file), "utf8"));
+  Object.assign(spec.paths, mod.paths);
+}
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
 
 // Registo dos módulos de rotas
 // Módulos com rotas públicas 

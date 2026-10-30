@@ -1,0 +1,128 @@
+paths:
+  /api/livros:
+    get:
+      tags: [Livros]
+      summary: Lista os livros do catálogo
+      security: []
+      parameters:
+        - in: query
+          name: busca
+          required: false
+          schema: { type: string }
+          description: Filtra livros cujo título ou autor contém este texto (sem diferenciar maiúsculas de minúsculas)
+          example: casmurro
+      responses:
+        "200":
+          description: Lista de livros ordenada por título
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Livro"
+
+    post:
+      tags: [Livros]
+      summary: Adiciona um livro ao catálogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [titulo, autor, totalPaginas]
+              properties:
+                titulo:
+                  type: string
+                  example: Dom Casmurro
+                autor:
+                  type: string
+                  example: Machado de Assis
+                totalPaginas:
+                  type: integer
+                  description: Deve ser maior que zero
+                  example: 256
+                generoId:
+                  type: integer
+                  description: Opcional. Id de um gênero existente
+                  example: 2
+                capaUrl:
+                  type: string
+                  description: Opcional. Endereço da imagem da capa
+                  example: "https://exemplo.com/capa.jpg"
+      responses:
+        "201":
+          description: Livro adicionado ao catálogo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Livro adicionado ao catálogo com sucesso! }
+                  livro: { $ref: "#/components/schemas/LivroRegistro" }
+        "400":
+          description: |
+            Requisição inválida (`VALIDATION_ERROR`). Possíveis causas:
+            - título ausente ou vazio
+            - autor ausente ou vazio
+            - totalPaginas ausente ou menor ou igual a zero
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+
+  /api/livros/{id}:
+    get:
+      tags: [Livros]
+      summary: Busca um livro pelo id
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do livro
+          example: 5
+      responses:
+        "200":
+          description: Livro encontrado, com o nome do gênero
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Livro" }
+        "400":
+          description: Id inválido (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "404":
+          description: Livro não encontrado no catálogo (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    delete:
+      tags: [Livros]
+      summary: Remove um livro do catálogo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do livro
+          example: 5
+      responses:
+        "204":
+          description: Livro removido (sem corpo na resposta)
+        "400":
+          description: Id inválido (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Livro não encontrado para remoção (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }

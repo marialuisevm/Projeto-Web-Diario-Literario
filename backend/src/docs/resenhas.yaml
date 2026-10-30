@@ -1,0 +1,192 @@
+paths:
+  /api/resenhas:
+    get:
+      tags: [Resenhas]
+      summary: Lista as resenhas do usuário
+      parameters:
+        - in: query
+          name: avaliacao
+          required: false
+          schema: { type: integer }
+          description: Filtra as resenhas com esta nota (inteiro de 1 a 5)
+          example: 5
+      responses:
+        "200":
+          description: Lista de resenhas da mais recente para a mais antiga
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Resenha"
+        "400":
+          description: Nota do filtro inválida (`INVALID_RATING`). Deve ser um inteiro entre 1 e 5
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+
+    post:
+      tags: [Resenhas]
+      summary: Cria a resenha de uma leitura
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [leituraId, avaliacao]
+              properties:
+                leituraId:
+                  type: integer
+                  description: Id da leitura que será resenhada. Precisa ser do usuário e estar com status LIDO
+                  example: 3
+                avaliacao:
+                  type: integer
+                  description: Nota, inteiro de 1 a 5
+                  example: 5
+                comentario:
+                  type: string
+                  description: Opcional. Texto vazio ou só com espaços é salvo como nulo
+                  example: Um clássico imperdível.
+      responses:
+        "201":
+          description: Resenha criada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Resenha criada com sucesso! }
+                  resenha: { $ref: "#/components/schemas/Resenha" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: campos obrigatórios (leituraId e avaliacao) ausentes
+            - `INVALID_RATING`: a avaliação deve ser um inteiro entre 1 e 5
+            - `LEITURA_NOT_FINISHED`: a leitura ainda não está com status LIDO
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Leitura não encontrada (`NOT_FOUND`). Também ocorre quando a leitura pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: Esta leitura já possui uma resenha (`RESENHA_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/resenhas/{id}:
+    get:
+      tags: [Resenhas]
+      summary: Busca uma resenha pelo id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da resenha
+          example: 1
+      responses:
+        "200":
+          description: Resenha encontrada com os dados do livro
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Resenha" }
+        "400":
+          description: Id inválido (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Resenha não encontrada (`NOT_FOUND`). Também ocorre quando a resenha pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    put:
+      tags: [Resenhas]
+      summary: Altera a nota e o comentário de uma resenha
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da resenha
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [avaliacao]
+              properties:
+                avaliacao:
+                  type: integer
+                  description: Nova nota, inteiro de 1 a 5
+                  example: 4
+                comentario:
+                  type: string
+                  nullable: true
+                  description: Opcional. Se não for enviado, o comentário atual é mantido. Se for enviado vazio ou null, o comentário é apagado
+                  example: Reli e gostei ainda mais.
+      responses:
+        "200":
+          description: Resenha atualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Resenha atualizada com sucesso! }
+                  resenha: { $ref: "#/components/schemas/Resenha" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: id inválido ou campo avaliação ausente
+            - `INVALID_RATING`: a avaliação deve ser um inteiro entre 1 e 5
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Resenha não encontrada (`NOT_FOUND`). Também ocorre quando a resenha pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    delete:
+      tags: [Resenhas]
+      summary: Remove uma resenha
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da resenha
+          example: 1
+      responses:
+        "204":
+          description: Resenha removida
+        "400":
+          description: Id inválido (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Resenha não encontrada para remoção (`NOT_FOUND`). Também ocorre quando a resenha pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
