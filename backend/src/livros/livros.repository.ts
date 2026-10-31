@@ -83,3 +83,14 @@ export async function updateCapa(id: number, capaUrl: string): Promise<LivroRow 
   const result = await pool.query(query, [capaUrl, id]);
   return result.rows[0] ?? null;
 }
+export async function update(id: number, data: CreateLivroDTO): Promise<LivroRow | null> {
+  const query = `
+    UPDATE livros
+    SET titulo = $1, autor = $2, total_paginas = $3, genero_id = $4
+    WHERE id = $5
+    RETURNING *;
+  `;
+  const values = [data.titulo, data.autor, data.total_paginas, data.genero_id ?? null, id];
+  const result = await pool.query(query, values);
+  return result.rows[0] ?? null;
+}

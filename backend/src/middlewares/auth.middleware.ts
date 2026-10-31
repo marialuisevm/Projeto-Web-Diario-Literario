@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { loadConfig } from "../config";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
 
 const config = loadConfig();
 
