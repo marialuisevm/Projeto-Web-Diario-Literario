@@ -7,7 +7,7 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  // 1. Registo interno no terminal para depuração
+  // 1. Registro interno no terminal para depuração
   console.error("LOG INTERNO DO SERVIDOR:", err);
 
   // 2. Erro conhecido/controlado da aplicação (família 4xx)

@@ -6,7 +6,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+      if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
       return next(new AppError("Campos obrigatórios: email e password.", 400, "VALIDATION_ERROR"));
     }
 

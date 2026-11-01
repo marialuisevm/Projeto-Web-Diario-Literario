@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as resenhasService from "./resenhas.service";
 import { AppError } from "../errors/AppError";
+import { isValidId } from "../utils/validators";
 
 // Lista as resenhas do usuário
 export async function getAll(req: Request, res: Response, next: NextFunction) {
@@ -21,7 +22,7 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
     const userId = (req as any).userId;
     const id = Number(req.params.id);
 
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de resenha inválido.", 400, "INVALID_ID"));
     }
 
@@ -64,7 +65,7 @@ export async function update(req: Request, res: Response, next: NextFunction) {
     const id = Number(req.params.id);
     const { avaliacao, comentario } = req.body;
 
-    if (isNaN(id) || avaliacao === undefined) {
+    if (!isValidId(id) || avaliacao === undefined) {
       return next(
         new AppError("Informe o ID da resenha e a avaliacao.", 400, "VALIDATION_ERROR")
       );
@@ -72,7 +73,7 @@ export async function update(req: Request, res: Response, next: NextFunction) {
 
     const atualizada = await resenhasService.update(id, userId, {
       avaliacao: Number(avaliacao),
-      comentario: comentario ?? null,
+      comentario,
     });
 
     res.status(200).json({
@@ -89,7 +90,7 @@ export async function remove(req: Request, res: Response, next: NextFunction) {
     const userId = (req as any).userId;
     const id = Number(req.params.id);
 
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de resenha inválido.", 400, "INVALID_ID"));
     }
 

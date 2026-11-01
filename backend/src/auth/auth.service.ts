@@ -11,17 +11,17 @@ export interface LoginDTO {
 
 export async function login(data: LoginDTO) {
   if (!data.email || !data.password) {
-    throw new AppError("E-mail e palavra-passe são obrigatórios.", 400, "VALIDATION_ERROR");
+    throw new AppError("E-mail e senha são obrigatórios.", 400, "VALIDATION_ERROR");
   }
 
   const user = await usersRepository.findByEmail(data.email.trim());
   if (!user) {
-    throw new AppError("E-mail ou palavra-passe inválidos.", 401, "INVALID_CREDENTIALS");
+    throw new AppError("E-mail ou senha inválidos.", 401, "INVALID_CREDENTIALS");
   }
 
   const passwordOk = await bcrypt.compare(data.password, user.password);
   if (!passwordOk) {
-    throw new AppError("E-mail ou palavra-passe inválidos.", 401, "INVALID_CREDENTIALS");
+    throw new AppError("E-mail ou senha inválidos.", 401, "INVALID_CREDENTIALS");
   }
 
   const config = loadConfig();

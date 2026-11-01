@@ -4,7 +4,7 @@ import { requireAuth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// Todas as rotas de resenhas requerem utilizador autenticado
+// Todas as rotas de resenhas requerem usuário autenticado
 router.use(requireAuth);
 
 router.get("/api/resenhas", resenhasController.getAll);

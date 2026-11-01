@@ -4,7 +4,7 @@ import { requireAuth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// Todas as rotas de metas requerem utilizador autenticado
+// Todas as rotas de metas requerem usuário autenticado
 router.use(requireAuth);
 
 router.get("/api/metas", metasController.getAll);

@@ -4,7 +4,7 @@ import { requireAuth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// Todas as rotas de leituras requerem utilizador autenticado
+// Todas as rotas de leituras requerem usuário autenticado
 router.use(requireAuth);
 
 router.get("/api/leituras", leiturasController.getAll);

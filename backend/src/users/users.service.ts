@@ -10,12 +10,12 @@ export interface RegisterDTO {
 
 export async function register(data: RegisterDTO) {
   if (!data.password || data.password.length < 6) {
-    throw new AppError("A palavra-passe deve ter pelo menos 6 caracteres.", 400, "VALIDATION_ERROR");
+    throw new AppError("A senha deve ter pelo menos 6 caracteres.", 400, "VALIDATION_ERROR");
   }
 
   const userExists = await usersRepository.findByEmail(data.email);
   if (userExists) {
-    throw new AppError("Este e-mail já se encontra registado.", 409, "EMAIL_ALREADY_EXISTS");
+    throw new AppError("Este e-mail já se encontra cadastrado.", 409, "EMAIL_ALREADY_EXISTS");
   }
 
   const saltRounds = 10;
@@ -34,7 +34,7 @@ export async function register(data: RegisterDTO) {
 export async function getProfile(userId: number) {
   const user = await usersRepository.findById(userId);
   if (!user) {
-    throw new AppError("Utilizador não encontrado.", 404, "NOT_FOUND");
+    throw new AppError("Usuário não encontrado.", 404, "NOT_FOUND");
   }
 
   return {
