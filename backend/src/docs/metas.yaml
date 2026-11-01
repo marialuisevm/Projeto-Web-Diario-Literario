@@ -1,0 +1,198 @@
+paths:
+  /api/metas:
+    get:
+      tags: [Metas]
+      summary: Lista todas as metas
+      responses:
+        "200":
+          description: Lista de metas com o progresso
+          content:
+            application/json:
+              schema:
+                type: array 
+                items:                 
+                  $ref: "#/components/schemas/MetaProgresso"
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"           
+    
+    post:
+      tags: [Metas]
+      summary: Cria uma meta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ano, metaLivros]
+              properties:
+                ano:
+                  type: integer
+                  description: ano deve estar entre 2000 e o ano seguinte ao atual 
+                  example: 2026
+                metaLivros:
+                  type: integer
+                  description: metaLivros deve ser maior que zero
+                  example: 24
+      responses:
+        "201":
+          description: Meta criada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Meta de leitura criada com sucesso! }
+                  meta: { $ref: "#/components/schemas/MetaProgresso" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: campos obrigatórios (ano e metaLivros) ausentes
+            - `INVALID_YEAR`: ano fora do intervalo de 2000 até o ano seguinte ao atual
+            - `INVALID_GOAL`: a meta deve ser um número inteiro maior que zero
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: Já existe uma meta para este ano (`META_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+
+  /api/metas/{id}:
+    get:
+      tags: [Metas]
+      summary: Busca uma meta pelo id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da meta
+          example: 1
+      responses:
+        "200":
+          description: Meta encontrada e com o progresso
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MetaProgresso" }
+        "400":
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Meta não encontrada (`NOT_FOUND`). Também ocorre quando a meta pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    put:
+      tags: [Metas]
+      summary: Altera a quantidade de livros de uma meta
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da meta
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [metaLivros]
+              properties:
+                metaLivros:
+                  type: integer
+                  description: A nova quantidade de livros deve ser um inteiro maior que zero
+                  example: 30
+      responses:
+        "200":
+          description: Meta atualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Meta atualizada com sucesso! }
+                  meta: { $ref: "#/components/schemas/MetaProgresso" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: id inválido (deve ser um inteiro positivo) ou campo metaLivros ausente
+            - `INVALID_GOAL`: a meta deve ser um número inteiro maior que zero
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Meta não encontrada (`NOT_FOUND`). Também ocorre quando a meta pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    delete:
+      tags: [Metas]
+      summary: Remove uma meta
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id da meta
+          example: 1
+      responses:
+        "204":
+          description: Meta removida 
+        "400":
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Meta não encontrada para remoção (`NOT_FOUND`). Também ocorre quando a meta pertence a outro usuário
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/metas/ano/{ano}/progresso:
+    get:
+      tags: [Metas]
+      summary: Mostra o progresso da meta do ano solicitado
+      parameters:
+        - in: path
+          name: ano
+          required: true
+          schema: { type: integer }
+          description: Ano da meta
+          example: 2026
+      responses:
+        "200":
+          description: Meta do ano com o progresso
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MetaProgresso" }
+        "400":
+          description: Ano inválido (`INVALID_YEAR`). O ano deve ser um inteiro entre 2000 e o ano seguinte ao atual
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: O usuário não definiu meta para este ano (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }

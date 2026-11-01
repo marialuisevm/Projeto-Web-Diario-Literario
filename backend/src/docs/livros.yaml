@@ -1,0 +1,275 @@
+paths:
+  /api/livros:
+    get:
+      tags: [Livros]
+      summary: Lista os livros do catálogo
+      security: []
+      parameters:
+        - in: query
+          name: busca
+          required: false
+          schema: { type: string }
+          description: Filtra livros cujo título ou autor contém este texto (sem diferenciar maiúsculas de minúsculas)
+          example: casmurro
+      responses:
+        "200":
+          description: Lista de livros ordenada por título
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Livro"
+
+    post:
+      tags: [Livros]
+      summary: Adiciona um livro ao catálogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [titulo, autor, totalPaginas]
+              properties:
+                titulo:
+                  type: string
+                  maxLength: 200
+                  example: Dom Casmurro
+                autor:
+                  type: string
+                  maxLength: 150
+                  example: Machado de Assis
+                totalPaginas:
+                  type: integer
+                  description: Deve ser maior que zero
+                  example: 256
+                generoId:
+                  type: integer
+                  description: Opcional. Id de um gênero existente
+                  example: 2
+                capaUrl:
+                  type: string
+                  maxLength: 255
+                  description: Opcional. Endereço da imagem da capa. Para enviar um arquivo de imagem, use a rota de upload da capa
+                  example: "https://exemplo.com/capa.jpg"
+      responses:
+        "201":
+          description: Livro adicionado ao catálogo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Livro adicionado ao catálogo com sucesso! }
+                  livro: { $ref: "#/components/schemas/LivroRegistro" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: título ausente, vazio ou com mais de 200 caracteres; autor ausente, vazio ou com mais de 150 caracteres; totalPaginas que não seja um inteiro maior que zero; generoId que não seja um inteiro positivo; capaUrl que não seja um texto de até 255 caracteres
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: O gênero informado em generoId não existe (`GENERO_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: Já existe um livro com este título e autor, sem diferenciar maiúsculas de minúsculas (`LIVRO_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/livros/{id}:
+    get:
+      tags: [Livros]
+      summary: Busca um livro pelo id
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do livro
+          example: 5
+      responses:
+        "200":
+          description: Livro encontrado, com o nome do gênero
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Livro" }
+        "400":
+          description: Id inválido. O id deve ser um inteiro positivo (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "404":
+          description: Livro não encontrado no catálogo (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    put:
+      tags: [Livros]
+      summary: Altera os dados de um livro
+      description: |
+        Substitui título, autor e total de páginas do livro. Sobre o gênero:
+        - generoId não enviado: o gênero atual é mantido
+        - generoId com um id existente: o gênero passa a ser este
+        - generoId `null`: o gênero é removido do livro
+        A capa não é alterada por esta rota. Para trocar a capa, use o upload da capa.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do livro
+          example: 5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [titulo, autor, totalPaginas]
+              properties:
+                titulo:
+                  type: string
+                  maxLength: 200
+                  example: Dom Casmurro
+                autor:
+                  type: string
+                  maxLength: 150
+                  example: Machado de Assis
+                totalPaginas:
+                  type: integer
+                  description: Deve ser um inteiro maior que zero
+                  example: 256
+                generoId:
+                  type: integer
+                  nullable: true
+                  description: Opcional. Id de um gênero existente. Se não for enviado, o gênero atual é mantido. Se for null, o gênero é removido
+                  example: 2
+      responses:
+        "200":
+          description: Livro atualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Livro atualizado com sucesso! }
+                  livro: { $ref: "#/components/schemas/LivroRegistro" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `INVALID_ID`: o id deve ser um inteiro positivo
+            - `VALIDATION_ERROR`: título ausente, vazio ou com mais de 200 caracteres; autor ausente, vazio ou com mais de 150 caracteres; totalPaginas que não seja um inteiro maior que zero; generoId que não seja um inteiro positivo
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: |
+            Não encontrado. Possíveis erros:
+            - `NOT_FOUND`: livro não encontrado
+            - `GENERO_NOT_FOUND`: o gênero informado em generoId não existe
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: Já existe outro livro com este título e autor, sem diferenciar maiúsculas de minúsculas (`LIVRO_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    delete:
+      tags: [Livros]
+      summary: Remove um livro do catálogo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do livro
+          example: 5
+      responses:
+        "204":
+          description: Livro removido (sem corpo na resposta)
+        "400":
+          description: Id inválido. O id deve ser um inteiro positivo (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Livro não encontrado para remoção (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: O livro está na lista de leituras de algum usuário e não pode ser removido (`LIVRO_IN_USE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/livros/{id}/capa:
+    post:
+      tags: [Livros]
+      summary: Envia a imagem de capa de um livro
+      description: |
+        Envia um arquivo de imagem (JPG, PNG ou WEBP, até 2 MB) no campo `capa`. O arquivo é salvo no servidor e o campo `capa_url` do livro passa a apontar para ele (por exemplo `/uploads/1730000000000-123456789.jpg`). Se o livro já tinha capa, ela é substituída.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do livro
+          example: 5
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [capa]
+              properties:
+                capa:
+                  type: string
+                  format: binary
+                  description: Imagem JPG, PNG ou WEBP com no máximo 2 MB
+      responses:
+        "200":
+          description: Capa enviada e livro atualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Capa enviada com sucesso! }
+                  livro: { $ref: "#/components/schemas/LivroRegistro" }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `INVALID_ID`: o id deve ser um inteiro positivo
+            - `FILE_REQUIRED`: nenhuma imagem foi enviada no campo `capa`
+            - `INVALID_FILE_TYPE`: o arquivo não é uma imagem JPG, PNG ou WEBP
+            - `FILE_TOO_LARGE`: a imagem tem mais de 2 MB
+            - `UPLOAD_ERROR`: outro erro no envio do arquivo (por exemplo, o arquivo foi enviado em um campo diferente de `capa`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Livro não encontrado (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
