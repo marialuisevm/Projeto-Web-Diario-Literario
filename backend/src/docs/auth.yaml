@@ -1,49 +1,4 @@
 paths:
-  /api/auth/register:
-    post:
-      tags: [Autenticação]
-      summary: Cadastra um novo usuário
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [nome, email, senha]
-              properties:
-                nome:
-                  type: string
-                  example: Maria Silva
-                email:
-                  type: string
-                  example: maria@exemplo.com
-                senha:
-                  type: string
-                  example: uma_senha_forte
-      responses:
-        "201":
-          description: Usuário criado (a senha não é devolvida)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id: { type: integer, example: 1 }
-                  name: { type: string, example: Maria Silva }
-                  email: { type: string, example: maria@exemplo.com }
-                  created_at: { type: string, format: date-time, example: "2026-10-30T03:30:00.000Z" }
-        "400":
-          description: Nome, email ou senha ausentes (`VALIDATION_ERROR`)
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Erro" }
-        "409":
-          description: Já existe um usuário com este e-mail (`USER_ALREADY_EXISTS`)
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Erro" }
-
   /api/auth/login:
     post:
       tags: [Autenticação]
@@ -55,12 +10,12 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email, senha]
+              required: [email, password]
               properties:
                 email:
                   type: string
                   example: maria@exemplo.com
-                senha:
+                password:
                   type: string
                   example: uma_senha_forte
       responses:
@@ -71,15 +26,17 @@ paths:
               schema:
                 type: object
                 properties:
-                  usuario:
-                    type: object
-                    properties:
-                      id: { type: integer, example: 1 }
-                      nome: { type: string, example: Maria Silva }
-                      email: { type: string, example: maria@exemplo.com }
+                  message: { type: string, example: Login realizado com sucesso! }
                   token: { type: string, example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
+                  user: { $ref: "#/components/schemas/Usuario" }
         "400":
-          description: Email ou senha ausentes (`VALIDATION_ERROR`)
+          description: |
+
+            Requisição inválida. Possíveis erros:
+
+            - `VALIDATION_ERROR`: email ou password ausentes, vazios ou que não são texto
+
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }

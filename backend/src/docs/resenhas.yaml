@@ -63,9 +63,10 @@ paths:
         "400":
           description: |
             Requisição inválida. Possíveis erros:
-            - `VALIDATION_ERROR`: campos obrigatórios (leituraId e avaliacao) ausentes
+            - `VALIDATION_ERROR`: campos obrigatórios (leituraId e avaliacao) ausentes, leituraId que não seja um inteiro positivo ou comentario que não seja um texto
             - `INVALID_RATING`: a avaliação deve ser um inteiro entre 1 e 5
             - `LEITURA_NOT_FINISHED`: a leitura ainda não está com status LIDO
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -100,7 +101,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Resenha" }
         "400":
-          description: Id inválido (`INVALID_ID`)
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -152,8 +153,9 @@ paths:
         "400":
           description: |
             Requisição inválida. Possíveis erros:
-            - `VALIDATION_ERROR`: id inválido ou campo avaliação ausente
+            - `VALIDATION_ERROR`: id inválido (deve ser um inteiro positivo), campo avaliacao ausente ou comentario que não seja um texto
             - `INVALID_RATING`: a avaliação deve ser um inteiro entre 1 e 5
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -179,7 +181,7 @@ paths:
         "204":
           description: Resenha removida
         "400":
-          description: Id inválido (`INVALID_ID`)
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }

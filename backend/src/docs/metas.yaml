@@ -50,11 +50,12 @@ paths:
             - `VALIDATION_ERROR`: campos obrigatórios (ano e metaLivros) ausentes
             - `INVALID_YEAR`: ano fora do intervalo de 2000 até o ano seguinte ao atual
             - `INVALID_GOAL`: a meta deve ser um número inteiro maior que zero
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
         "409":
-          description: Já existe uma meta para este ano
+          description: Já existe uma meta para este ano (`META_ALREADY_EXISTS`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -79,7 +80,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/MetaProgresso" }
         "400":
-          description: Id inválido (`INVALID_ID`)
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -126,8 +127,9 @@ paths:
         "400":
           description: |
             Requisição inválida. Possíveis erros:
-            - `VALIDATION_ERROR`: id inválido ou campo metaLivros ausente
+            - `VALIDATION_ERROR`: id inválido (deve ser um inteiro positivo) ou campo metaLivros ausente
             - `INVALID_GOAL`: a meta deve ser um número inteiro maior que zero
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -153,7 +155,7 @@ paths:
         "204":
           description: Meta removida 
         "400":
-          description: Id inválido (`INVALID_ID`)
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }

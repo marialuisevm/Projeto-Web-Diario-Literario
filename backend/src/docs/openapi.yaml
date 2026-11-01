@@ -53,7 +53,7 @@ components:
         capaUrl: { type: string, nullable: true, example: "https://exemplo.com/capa.jpg" }
         paginasLidas: { type: integer, example: 128 }
         porcentagem: { type: integer, example: 50 }
-        status: { type: string, enum: [QUERO_LER, LENDO, LIDO], example: LENDO }
+        status: { type: string, enum: [QUERO_LER, LENDO, LIDO, ABANDONADO], example: LENDO }
         dataInicio: { type: string, format: date-time, nullable: true, example: "2026-10-30T10:00:00.000Z" }
         dataFim: { type: string, format: date-time, nullable: true, example: null }
         createdAt: { type: string, format: date-time, example: "2026-10-30T10:00:00.000Z" }
@@ -64,7 +64,7 @@ components:
         user_id: { type: integer, example: 2 }
         livro_id: { type: integer, example: 5 }
         paginas_lidas: { type: integer, example: 0 }
-        status: { type: string, enum: [QUERO_LER, LENDO, LIDO], example: QUERO_LER }
+        status: { type: string, enum: [QUERO_LER, LENDO, LIDO, ABANDONADO], example: QUERO_LER }
         data_inicio: { type: string, format: date-time, nullable: true, example: null }
         data_fim: { type: string, format: date-time, nullable: true, example: null }
         created_at: { type: string, format: date-time, example: "2026-10-30T10:00:00.000Z" }

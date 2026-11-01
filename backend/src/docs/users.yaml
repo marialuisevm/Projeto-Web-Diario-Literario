@@ -35,9 +35,9 @@ paths:
                   user: { $ref: "#/components/schemas/Usuario" }
         "400":
           description: |
-            Requisição inválida (`VALIDATION_ERROR`). Possíveis causas:
-            - name, email ou password ausentes
-            - password com menos de 6 caracteres
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: name, email ou password ausentes ou que não são texto; name com mais de 100 caracteres; email com mais de 200 caracteres; password com menos de 6 caracteres
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }

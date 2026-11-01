@@ -54,14 +54,17 @@ paths:
                       id: { type: integer, example: 2 }
                       nome: { type: string, example: Fantasia }
         "400":
-          description: Nome ausente, vazio ou com mais de 80 caracteres
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: nome ausente, vazio ou com mais de 80 caracteres
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
         "401":
           $ref: "#/components/responses/NaoAutorizado"
         "409":
-          description: Já existe um gênero com este nome
+          description: Já existe um gênero com este nome (`GENERO_ALREADY_EXISTS`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -89,12 +92,12 @@ paths:
                   id: { type: integer, example: 1 }
                   nome: { type: string, example: Ficção }
         "400":
-          description: Id inválido (não é número inteiro positivo)
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
         "404":
-          description: Gênero não encontrado
+          description: Gênero não encontrado (`NOT_FOUND`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -136,19 +139,23 @@ paths:
                       id: { type: integer, example: 1 }
                       nome: { type: string, example: Ficção Científica }
         "400":
-          description: Id inválido, ou nome ausente, vazio ou com mais de 80 caracteres
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `INVALID_ID`: o id deve ser um inteiro positivo
+            - `VALIDATION_ERROR`: nome ausente, vazio ou com mais de 80 caracteres
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
         "401":
           $ref: "#/components/responses/NaoAutorizado"
         "404":
-          description: Gênero não encontrado
+          description: Gênero não encontrado (`NOT_FOUND`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
         "409":
-          description: Já existe outro gênero com este nome
+          description: Já existe outro gênero com este nome (`GENERO_ALREADY_EXISTS`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -167,14 +174,14 @@ paths:
         "204":
           description: Gênero removido (sem corpo na resposta)
         "400":
-          description: Id inválido (não é número)
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
         "401":
           $ref: "#/components/responses/NaoAutorizado"
         "404":
-          description: Gênero não encontrado para remoção
+          description: Gênero não encontrado para remoção (`NOT_FOUND`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }

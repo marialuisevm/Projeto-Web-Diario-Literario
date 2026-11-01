@@ -9,7 +9,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [QUERO_LER, LENDO, LIDO]
+            enum: [QUERO_LER, LENDO, LIDO, ABANDONADO]
           description: Filtra as leituras por status
           example: LIDO
       responses:
@@ -21,9 +21,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Leitura"
+        "400":
+          description: Status do filtro inválido (`INVALID_STATUS`). Valores aceitos são QUERO_LER, LENDO, LIDO e ABANDONADO
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
         "401":
           $ref: "#/components/responses/NaoAutorizado"
-
+          
     post:
       tags: [Leituras]
       summary: Adiciona um livro à lista de leituras do usuário
@@ -37,13 +42,16 @@ paths:
               properties:
                 livroId:
                   type: integer
-                  description: Id de um livro do catálogo
+                  description: Id de um livro do catálogo. Deve ser um inteiro positivo
                   example: 5
                 status:
                   type: string
-                  enum: [QUERO_LER, LENDO, LIDO]
+                  enum: [QUERO_LER, LENDO, LIDO, ABANDONADO]
                   default: QUERO_LER
-                  description: Opcional. Se for LENDO, a data de início é preenchida automaticamente
+                  description: |
+                    Opcional. Se não for enviado, a leitura começa como QUERO_LER. Efeitos de cada status ao criar:
+                    - LENDO: a data de início é preenchida automaticamente
+                    - LIDO: as datas de início e de fim são preenchidas e todas as páginas do livro contam como lidas
                   example: QUERO_LER
       responses:
         "201":
@@ -56,7 +64,11 @@ paths:
                   message: { type: string, example: Livro adicionado à sua lista! }
                   leitura: { $ref: "#/components/schemas/LeituraRegistro" }
         "400":
-          description: Campo livroId ausente (`VALIDATION_ERROR`)
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: livroId ausente ou que não seja um inteiro positivo
+            - `INVALID_STATUS`: o status deve ser QUERO_LER, LENDO, LIDO ou ABANDONADO
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -91,7 +103,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Leitura" }
         "400":
-          description: Id inválido (`INVALID_ID`)
+          description: Id inválido. O id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -117,7 +129,7 @@ paths:
         "204":
           description: Leitura removida (sem corpo na resposta)
         "400":
-          description: Id inválido (`INVALID_ID`)
+          description: Id inválido. O id deve ser um inteiro positivo (`INVALID_ID`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
@@ -172,6 +184,7 @@ paths:
             Requisição inválida. Possíveis erros:
             - `VALIDATION_ERROR`: id inválido ou campo paginasLidas ausente
             - `INVALID_PAGE_COUNT`: as páginas lidas devem estar entre 0 e o total de páginas do livro
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Erro" }
