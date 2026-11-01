@@ -31,7 +31,7 @@ app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "API Diário Literário online!" });
 });
 
-// Registo dos módulos de rotas
+// Registro dos módulos de rotas
 // Módulos com rotas públicas 
 app.use(authRoutes);
 app.use(usersRoutes);

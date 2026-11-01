@@ -94,3 +94,30 @@ export async function update(id: number, data: CreateLivroDTO): Promise<LivroRow
   const result = await pool.query(query, values);
   return result.rows[0] ?? null;
 }
+
+// Procura um livro com o mesmo título e autor, sem diferenciar maiúsculas e minúsculas
+export async function findByTituloAutor(
+  titulo: string,
+  autor: string,
+  ignorarId?: number
+): Promise<LivroRow | null> {
+  const query = `
+    SELECT id, titulo, autor, total_paginas, genero_id, capa_url, created_at
+    FROM livros
+    WHERE LOWER(titulo) = LOWER($1)
+      AND LOWER(autor) = LOWER($2)
+      AND ($3::int IS NULL OR id <> $3)
+    LIMIT 1;
+  `;
+  const result = await pool.query(query, [titulo, autor, ignorarId ?? null]);
+  return result.rows[0] ?? null;
+}
+
+// Conta quantas leituras de usuários usam este livro
+export async function countLeituras(livroId: number): Promise<number> {
+  const result = await pool.query(
+    "SELECT COUNT(*)::int AS total FROM leituras WHERE livro_id = $1;",
+    [livroId]
+  );
+  return result.rows[0].total;
+}
