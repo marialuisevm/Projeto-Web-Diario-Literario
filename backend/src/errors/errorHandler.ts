@@ -20,6 +20,16 @@ export function errorHandler(
     });
   }
 
+  // JSON malformado enviado pelo cliente (erro do express.json)
+  if ((err as any).type === "entity.parse.failed") {
+    return res.status(400).json({
+      error: {
+        code: "INVALID_JSON",
+        message: "O corpo da requisição não é um JSON válido.",
+      },
+    });
+  }
+  
   // 3. Erro inesperado ou do banco de dados (família 5xx)
   return res.status(500).json({
     error: {

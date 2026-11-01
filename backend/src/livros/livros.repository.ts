@@ -112,3 +112,12 @@ export async function findByTituloAutor(
   const result = await pool.query(query, [titulo, autor, ignorarId ?? null]);
   return result.rows[0] ?? null;
 }
+
+// Conta quantas leituras de usuários usam este livro
+export async function countLeituras(livroId: number): Promise<number> {
+  const result = await pool.query(
+    "SELECT COUNT(*)::int AS total FROM leituras WHERE livro_id = $1;",
+    [livroId]
+  );
+  return result.rows[0].total;
+}

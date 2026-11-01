@@ -92,6 +92,15 @@ export async function create(input: LivroInput) {
 }
 
 export async function remove(id: number) {
+  const emUso = await livrosRepository.countLeituras(id);
+  if (emUso > 0) {
+    throw new AppError(
+      "Este livro está na lista de leituras de algum usuário e não pode ser removido.",
+      409,
+      "LIVRO_IN_USE"
+    );
+  }
+  
   const removido = await livrosRepository.remove(id);
   if (!removido) {
     throw new AppError("Livro não encontrado para remoção.", 404, "NOT_FOUND");

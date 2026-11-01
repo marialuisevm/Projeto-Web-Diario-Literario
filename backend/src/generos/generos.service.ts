@@ -7,7 +7,7 @@ export interface GeneroInput {
 
 // Rejeita nome vazio ou só com espaços, valida o nome
 function validateNome(nome: string): string {
-  if (!nome || nome.trim() === "") {
+  if (!nome || typeof nome !== "string" || nome.trim() === "") {
     throw new AppError("O nome do gênero é obrigatório.", 400, "VALIDATION_ERROR");
   }
 
