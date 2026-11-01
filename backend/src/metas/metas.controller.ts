@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as metasService from "./metas.service";
 import { AppError } from "../errors/AppError";
+import { isValidId } from "../utils/validators";
 
 // Lista todas as metas do usuário cada uma com seu progresso
 export async function getAll(req: Request, res: Response, next: NextFunction) {
@@ -19,7 +20,7 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
     const userId = (req as any).userId;
     const id = Number(req.params.id);
 
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de meta inválido.", 400, "INVALID_ID"));
     }
 
@@ -76,7 +77,7 @@ export async function update(req: Request, res: Response, next: NextFunction) {
     const id = Number(req.params.id);
     const { metaLivros } = req.body;
 
-    if (isNaN(id) || metaLivros === undefined) {
+    if (!isValidId(id) || metaLivros === undefined) {
       return next(new AppError("Informe o ID da meta e o campo metaLivros.", 400, "VALIDATION_ERROR"));
     }
 
@@ -98,7 +99,7 @@ export async function remove(req: Request, res: Response, next: NextFunction) {
     const userId = (req as any).userId;
     const id = Number(req.params.id);
 
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de meta inválido.", 400, "INVALID_ID"));
     }
 

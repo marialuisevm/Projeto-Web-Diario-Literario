@@ -4,14 +4,12 @@ import { requireAuth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// Todas as rotas de metas requerem utilizador autenticado
-router.use(requireAuth);
-
-router.get("/api/metas", metasController.getAll);
-router.get("/api/metas/ano/:ano/progresso", metasController.getProgresso);
-router.get("/api/metas/:id", metasController.getById);
-router.post("/api/metas", metasController.create);
-router.put("/api/metas/:id", metasController.update);
-router.delete("/api/metas/:id", metasController.remove);
+// Todas as rotas de metas requerem usuário autenticado
+router.get("/api/metas", requireAuth, metasController.getAll);
+router.get("/api/metas/ano/:ano/progresso", requireAuth, metasController.getProgresso);
+router.get("/api/metas/:id", requireAuth, metasController.getById);
+router.post("/api/metas", requireAuth, metasController.create);
+router.put("/api/metas/:id", requireAuth, metasController.update);
+router.delete("/api/metas/:id", requireAuth, metasController.remove);
 
 export default router;

@@ -8,7 +8,7 @@ const router = Router();
 router.get("/api/generos", generosController.getAll);
 router.get("/api/generos/:id", generosController.getById);
 
-// Rotas protegidas (apenas utilizadores registados e autenticados)
+// Rotas protegidas (apenas usuários cadastrados e autenticados)
 router.post("/api/generos", requireAuth, generosController.create);
 router.put("/api/generos/:id", requireAuth, generosController.update);
 router.delete("/api/generos/:id", requireAuth, generosController.remove);

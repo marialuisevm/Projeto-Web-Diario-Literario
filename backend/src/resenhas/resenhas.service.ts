@@ -1,6 +1,7 @@
 import * as resenhasRepository from "./resenhas.repository";
 import * as leiturasRepository from "../leituras/leituras.repository";
-import { AppError } from "../errors/appError";
+import { AppError } from "../errors/AppError";
+import { isValidId } from "../utils/validators";
 
 export interface ResenhaInput {
   leituraId: number;
@@ -38,6 +39,9 @@ function cleanComentario(comentario?: string | null): string | null {
   if (comentario === undefined || comentario === null) {
     return null;
   }
+  if (typeof comentario !== "string") {
+    throw new AppError("O comentário deve ser um texto.", 400, "VALIDATION_ERROR");
+  }
   const limpo = comentario.trim();
   return limpo === "" ? null : limpo;
 }
@@ -62,6 +66,10 @@ export async function getResenhaById(id: number, userId: number) {
 }
 
 export async function create(userId: number, input: ResenhaInput) {
+    if (!isValidId(input.leituraId)) {
+    throw new AppError("O campo leituraId deve ser um número inteiro positivo.", 400, "VALIDATION_ERROR");
+  }
+  
   validateAvaliacao(input.avaliacao);
 
   // Verifica se a leitura existe e pertence ao usuário
@@ -91,22 +99,36 @@ export async function create(userId: number, input: ResenhaInput) {
     comentario: cleanComentario(input.comentario),
   });
 
-  return formatResenha(novaResenha);
+    // Busca de novo para trazer também os dados do livro (JOIN do repository)
+  const completa = await resenhasRepository.findById(novaResenha.id, userId);
+  return formatResenha(completa ?? novaResenha);
 }
 
 export async function update(id: number, userId: number, input: UpdateResenhaInput) {
   validateAvaliacao(input.avaliacao);
 
+  // Busca a resenha atual para saber se ela pertence ao usuário
+  const atual = await resenhasRepository.findById(id, userId);
+  if (!atual) {
+    throw new AppError("Resenha não encontrada.", 404, "NOT_FOUND");
+  }
+
+  // Comentário não enviado: mantém o atual. Enviado (mesmo vazio ou null): usa o novo valor
+  const comentario =
+    input.comentario === undefined ? atual.comentario : cleanComentario(input.comentario);
+
   const atualizada = await resenhasRepository.update(id, userId, {
     avaliacao: input.avaliacao,
-    comentario: cleanComentario(input.comentario),
+    comentario,
   });
 
   if (!atualizada) {
     throw new AppError("Resenha não encontrada.", 404, "NOT_FOUND");
   }
 
-  return formatResenha(atualizada);
+  // Busca de novo para trazer também os dados do livro
+  const completa = await resenhasRepository.findById(atualizada.id, userId);
+  return formatResenha(completa ?? atualizada);
 }
 
 export async function remove(id: number, userId: number) {

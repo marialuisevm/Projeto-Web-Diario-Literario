@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as generosService from "./generos.service";
 import { AppError } from "../errors/AppError";
+import { isValidId } from "../utils/validators";
 
 // Lê o parâmetro opcional da query string, passa pro service e responde
 export async function getAll(req: Request, res: Response, next: NextFunction) {
@@ -17,7 +18,7 @@ export async function getAll(req: Request, res: Response, next: NextFunction) {
 export async function getById(req: Request, res: Response, next: NextFunction) {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de gênero inválido.", 400, "INVALID_ID"));
     }
 
@@ -47,7 +48,7 @@ export async function create(req: Request, res: Response, next: NextFunction) {
 export async function update(req: Request, res: Response, next: NextFunction) {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de gênero inválido.", 400, "INVALID_ID"));
     }
 
@@ -67,7 +68,7 @@ export async function update(req: Request, res: Response, next: NextFunction) {
 export async function remove(req: Request, res: Response, next: NextFunction) {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de gênero inválido.", 400, "INVALID_ID"));
     }
 

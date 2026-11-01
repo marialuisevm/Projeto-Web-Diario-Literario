@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as livrosService from "./livros.service";
 import { AppError } from "../errors/AppError";
 import fs from "fs";
+import { isValidId } from "../utils/validators";
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
@@ -16,7 +17,7 @@ export async function getAll(req: Request, res: Response, next: NextFunction) {
 export async function getById(req: Request, res: Response, next: NextFunction) {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de livro inválido.", 400, "INVALID_ID"));
     }
 
@@ -35,7 +36,7 @@ export async function create(req: Request, res: Response, next: NextFunction) {
       titulo,
       autor,
       totalPaginas: Number(totalPaginas),
-      generoId: generoId ? Number(generoId) : null,
+      generoId: generoId === undefined || generoId === null ? null : Number(generoId),
       capaUrl: capaUrl ?? null,
     });
 
@@ -51,7 +52,7 @@ export async function create(req: Request, res: Response, next: NextFunction) {
 export async function remove(req: Request, res: Response, next: NextFunction) {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
       return next(new AppError("ID de livro inválido.", 400, "INVALID_ID"));
     }
 
@@ -64,9 +65,18 @@ export async function remove(req: Request, res: Response, next: NextFunction) {
 
 export async function uploadCapa(req: Request, res: Response, next: NextFunction) {
   const arquivo = req.file;
+
+    // O multer já salvou a imagem antes de chegar aqui, então qualquer falha precisa apagá-la
+  const apagarArquivo = () => {
+    if (arquivo) {
+      fs.unlink(arquivo.path, () => {});
+    }
+  };
+
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (!isValidId(id)) {
+      apagarArquivo();
       return next(new AppError("ID de livro inválido.", 400, "INVALID_ID"));
     }
 
@@ -81,9 +91,33 @@ export async function uploadCapa(req: Request, res: Response, next: NextFunction
     });
   } catch (error) {
     // Se deu erro depois de salvar a imagem, apaga o arquivo para não ficar lixo na pasta
-    if (arquivo) {
-      fs.unlink(arquivo.path, () => {});
+    apagarArquivo();
+    next(error);
+  }
+}
+
+export async function update(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = Number(req.params.id);
+    if (!isValidId(id)) {
+      return next(new AppError("ID de livro inválido.", 400, "INVALID_ID"));
     }
+
+    const { titulo, autor, totalPaginas, generoId } = req.body;
+
+    const livro = await livrosService.update(id, {
+      titulo,
+      autor,
+      totalPaginas: Number(totalPaginas),
+      // generoId não enviado: mantém o gênero atual. null: remove o gênero
+      generoId: generoId === undefined || generoId === null ? generoId : Number(generoId),
+    });
+
+    res.status(200).json({
+      message: "Livro atualizado com sucesso!",
+      livro,
+    });
+  } catch (error) {
     next(error);
   }
 }

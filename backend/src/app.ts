@@ -43,12 +43,12 @@ spec.paths = {};
 for (const file of fs.readdirSync(docsDir)) {
   if (file === "openapi.yaml" || !file.endsWith(".yaml")) continue;
   const mod = YAML.parse(fs.readFileSync(path.join(docsDir, file), "utf8"));
-  Object.assign(spec.paths, mod.paths);
+  Object.assign(spec.paths, mod?.paths ?? {});
 }
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
 
-// Registo dos módulos de rotas
+// Registro dos módulos de rotas
 // Módulos com rotas públicas 
 app.use(authRoutes);
 app.use(usersRoutes);
