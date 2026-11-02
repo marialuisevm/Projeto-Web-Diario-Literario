@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/app.ts",
     "migrate": "tsx migrate.ts",
-    "build": "tsc",
+    "build": "tsc && node -e \"require('fs').cpSync('src/docs','dist/src/docs',{recursive:true})\"",
     "start": "node dist/src/app.js"
   },
   "repository": {
