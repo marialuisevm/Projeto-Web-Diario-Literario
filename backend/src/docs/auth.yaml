@@ -1,0 +1,47 @@
+paths:
+  /api/auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Faz login e devolve o token JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: maria@exemplo.com
+                password:
+                  type: string
+                  example: uma_senha_forte
+      responses:
+        "200":
+          description: Login realizado. O token deve ser enviado nas rotas protegidas (botão Authorize)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Login realizado com sucesso! }
+                  token: { type: string, example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
+                  user: { $ref: "#/components/schemas/Usuario" }
+        "400":
+          description: |
+
+            Requisição inválida. Possíveis erros:
+
+            - `VALIDATION_ERROR`: email ou password ausentes, vazios ou que não são texto
+
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          description: E-mail ou senha inválidos (`INVALID_CREDENTIALS`). A mesma resposta vale para e-mail inexistente e senha errada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }

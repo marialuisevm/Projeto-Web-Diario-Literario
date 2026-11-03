@@ -11,9 +11,9 @@ INSERT INTO generos (nome) VALUES
 
 -- 3. Usuários de Teste (Senha: '123456')
 INSERT INTO users (name, email, password) VALUES 
-('Mallu Leitora', 'mallu@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
-('Maria Fernanda', 'maria@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
-('Ellen Silva', 'ellen@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
+('Mallu Leitora', 'mallu@email.com', '$2b$10$xmt9tgCVzC6bp7h7O52RjeEPBXRIsItQM6FBQR51FweNsrLE5ijQ6'),
+('Maria Fernanda', 'maria@email.com', '$2b$10$xmt9tgCVzC6bp7h7O52RjeEPBXRIsItQM6FBQR51FweNsrLE5ijQ6'),
+('Ellen Silva', 'ellen@email.com', '$2b$10$xmt9tgCVzC6bp7h7O52RjeEPBXRIsItQM6FBQR51FweNsrLE5ijQ6');
 
 -- 4. Catálogo de Livros
 INSERT INTO livros (titulo, autor, total_paginas, genero_id, capa_url) VALUES 

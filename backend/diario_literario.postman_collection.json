@@ -1,16 +1,43 @@
 {
 	"info": {
-		"_postman_id": "c1f83a42-7e9b-4b10-a29d-diarioliterario",
-		"name": "Diário Literário - API (Testes Mallu)",
-		"description": "Coleção de testes e documentação dos módulos de Autenticação, Usuários, Livros e Leituras.",
+		"_postman_id": "5e7c1b3a-0d4f-4a52-9a31-diario-literario-v2",
+		"name": "Diário Literário - API",
+		"description": "Coleção de testes da API do Diário Literário. Rode as pastas na ordem (1 a 8). A pasta 1 cria um usuário novo e guarda o token em {{token}}. Requer o servidor rodando em {{baseUrl}}.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "123456",
+			"type": "string"
+		},
+		{
+			"key": "autorLivro",
+			"value": "Autor Teste",
+			"type": "string"
+		}
+	],
 	"item": [
 		{
-			"name": "Auth",
+			"name": "1 - Cadastro e login",
 			"item": [
 				{
-					"name": "POST Registrar Usuário",
+					"name": "POST Cadastrar usuário (POST /api/users)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -19,31 +46,59 @@
 								"value": "application/json"
 							}
 						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Cria uma conta nova com e-mail único a cada execução e guarda o e-mail na variável {{email}}.",
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nome\": \"Maria Luise\",\n  \"email\": \"mallu@email.com\",\n  \"senha\": \"123456\"\n}"
+							"raw": "{\n  \"name\": \"Maria Teste\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						"url": {
-							"raw": "http://localhost:3000/auth/register",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["auth", "register"]
+						"auth": {
+							"type": "noauth"
 						}
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Exemplo 201 Created",
-							"status": "Created",
-							"code": 201,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "{\n  \"id\": 3,\n  \"nome\": \"Maria Luise\",\n  \"email\": \"mallu@email.com\",\n  \"created_at\": \"2026-10-27T12:00:00.000Z\"\n}"
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.collectionVariables.set(\"email\", `teste${Date.now()}@email.com`);"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+									"const j = pm.response.json();",
+									"pm.test(\"Mensagem de conta criada\", () => pm.expect(j.message).to.eql(\"Conta criada com sucesso!\"));",
+									"pm.test(\"Devolve o usuário sem a senha\", () => {",
+									"  pm.expect(j.user.email).to.eql(pm.collectionVariables.get(\"email\"));",
+									"  pm.expect(j.user).to.not.have.property(\"password\");",
+									"});"
+								]
+							}
 						}
 					]
 				},
 				{
-					"name": "POST Login",
+					"name": "POST Login (POST /api/auth/login)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -52,225 +107,2255 @@
 								"value": "application/json"
 							}
 						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Faz login e guarda o token na variável {{token}}. As demais requisições usam esse token automaticamente.",
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"mallu@email.com\",\n  \"senha\": \"123456\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:3000/auth/login",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["auth", "login"]
-						}
-					},
-					"response": [
-						{
-							"name": "Exemplo 200 OK",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "{\n  \"usuario\": {\n    \"id\": 3,\n    \"nome\": \"Maria Luise\",\n    \"email\": \"mallu@email.com\"\n  },\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJtYWxsdUBlbWFpbC5jb20ifQ...\"\n}"
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "Users",
-			"item": [
-				{
-					"name": "GET Listar Usuários",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
+							"raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
 							}
-						],
-						"url": {
-							"raw": "http://localhost:3000/users",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["users"]
+						},
+						"auth": {
+							"type": "noauth"
 						}
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Exemplo 200 OK",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "[\n  {\n    \"id\": 1,\n    \"nome\": \"Ana Silva\",\n    \"email\": \"ana@email.com\"\n  },\n  {\n    \"id\": 2,\n    \"nome\": \"Carlos Souza\",\n    \"email\": \"carlos@email.com\"\n  }\n]"
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "Livros",
-			"item": [
-				{
-					"name": "GET Listar Livros",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3000/livros",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["livros"]
-						}
-					},
-					"response": [
-						{
-							"name": "Exemplo 200 OK",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "[\n  {\n    \"id\": 1,\n    \"titulo\": \"Dom Casmurro\",\n    \"autor\": \"Machado de Assis\",\n    \"paginas\": 256,\n    \"genero_id\": 1\n  },\n  {\n    \"id\": 2,\n    \"titulo\": \"O Hobbit\",\n    \"autor\": \"J.R.R. Tolkien\",\n    \"paginas\": 310,\n    \"genero_id\": 2\n  }\n]"
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test(\"Devolve message, token e user\", () => {",
+									"  pm.expect(j.message).to.be.a(\"string\");",
+									"  pm.expect(j.token).to.be.a(\"string\").and.not.empty;",
+									"  pm.expect(j.user.email).to.eql(pm.collectionVariables.get(\"email\"));",
+									"});",
+									"pm.collectionVariables.set(\"token\", j.token);"
+								]
+							}
 						}
 					]
 				},
 				{
-					"name": "GET Livro por ID",
+					"name": "GET Meu perfil (GET /api/users/me)",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/livros/1",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["livros", "1"]
-						}
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me"
+							]
+						},
+						"description": "Rota protegida: devolve os dados do dono do token."
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Exemplo 200 OK",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "{\n  \"id\": 1,\n  \"titulo\": \"Dom Casmurro\",\n  \"autor\": \"Machado de Assis\",\n  \"paginas\": 256,\n  \"genero_id\": 1\n}"
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Perfil do usuário logado\", () => pm.expect(pm.response.json().email).to.eql(pm.collectionVariables.get(\"email\")));"
+								]
+							}
 						}
 					]
-				},
+				}
+			],
+			"description": "Cria um usuário novo e faz login. Rode esta pasta primeiro: ela preenche {{token}}."
+		},
+		{
+			"name": "2 - Gêneros",
+			"item": [
 				{
-					"name": "POST Criar Livro",
+					"name": "POST Criar gênero",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
 								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
 							}
 						],
+						"url": {
+							"raw": "{{baseUrl}}/api/generos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"generos"
+							]
+						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"titulo\": \"1984\",\n  \"autor\": \"George Orwell\",\n  \"paginas\": 326,\n  \"genero_id\": 3\n}"
-						},
-						"url": {
-							"raw": "http://localhost:3000/livros",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["livros"]
+							"raw": "{\n  \"nome\": \"{{generoNome}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						}
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Exemplo 201 Created",
-							"status": "Created",
-							"code": 201,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "{\n  \"id\": 6,\n  \"titulo\": \"1984\",\n  \"autor\": \"George Orwell\",\n  \"paginas\": 326,\n  \"genero_id\": 3\n}"
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.collectionVariables.set(\"generoNome\", `Genero Teste ${Date.now()}`);"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+									"const j = pm.response.json();",
+									"pm.test(\"Gênero criado com o nome enviado\", () => pm.expect(j.genero.nome).to.eql(pm.collectionVariables.get(\"generoNome\")));",
+									"pm.collectionVariables.set(\"generoId\", j.genero.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Listar gêneros (com busca)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/generos?busca=Genero Teste",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"generos"
+							],
+							"query": [
+								{
+									"key": "busca",
+									"value": "Genero Teste"
+								}
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Lista contém o gênero criado\", () => pm.expect(pm.response.json().some(g => g.id === Number(pm.collectionVariables.get(\"generoId\")))).to.be.true);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Gênero por id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/generos/{{generoId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"generos",
+								"{{generoId}}"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Id confere\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"generoId\"))));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Alterar gênero",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/generos/{{generoId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"generos",
+								"{{generoId}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"{{generoNome}} (editado)\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Nome atualizado\", () => pm.expect(pm.response.json().genero.nome).to.include(\"(editado)\"));"
+								]
+							}
 						}
 					]
 				}
 			]
 		},
 		{
-			"name": "Leituras",
+			"name": "3 - Livros",
 			"item": [
 				{
-					"name": "GET Listar Leituras",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "http://localhost:3000/leituras",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["leituras"]
-						}
-					},
-					"response": [
-						{
-							"name": "Exemplo 200 OK",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "[\n  {\n    \"id\": 1,\n    \"user_id\": 1,\n    \"livro_id\": 1,\n    \"status\": \"LENDO\",\n    \"paginas_lidas\": 120\n  }\n]"
-						}
-					]
-				},
-				{
-					"name": "POST Iniciar Leitura",
+					"name": "POST Criar livro",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
 								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
 							}
 						],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros"
+							]
+						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"livro_id\": 2,\n  \"status\": \"LENDO\",\n  \"paginas_lidas\": 0\n}"
-						},
-						"url": {
-							"raw": "http://localhost:3000/leituras",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3000",
-							"path": ["leituras"]
+							"raw": "{\n  \"titulo\": \"{{tituloLivro}}\",\n  \"autor\": \"{{autorLivro}}\",\n  \"totalPaginas\": 100,\n  \"generoId\": {{generoId}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						}
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Exemplo 201 Created",
-							"status": "Created",
-							"code": 201,
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"body": "{\n  \"id\": 4,\n  \"user_id\": 3,\n  \"livro_id\": 2,\n  \"status\": \"LENDO\",\n  \"paginas_lidas\": 0\n}"
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.collectionVariables.set(\"tituloLivro\", `Livro Teste ${Date.now()}`);",
+									"pm.collectionVariables.set(\"autorLivro\", \"Autor Teste\");"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+									"const j = pm.response.json();",
+									"pm.test(\"Livro criado\", () => {",
+									"  pm.expect(j.message).to.eql(\"Livro adicionado ao catálogo com sucesso!\");",
+									"  pm.expect(j.livro.total_paginas).to.eql(100);",
+									"});",
+									"pm.collectionVariables.set(\"livroId\", j.livro.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Listar livros (com busca)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros?busca=Livro Teste",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros"
+							],
+							"query": [
+								{
+									"key": "busca",
+									"value": "Livro Teste"
+								}
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Lista contém o livro criado\", () => pm.expect(pm.response.json().some(l => l.id === Number(pm.collectionVariables.get(\"livroId\")))).to.be.true);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Livro por id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/{{livroId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"{{livroId}}"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test(\"Vem com o nome do gênero\", () => {",
+									"  pm.expect(j.id).to.eql(Number(pm.collectionVariables.get(\"livroId\")));",
+									"  pm.expect(j.genero_nome).to.be.a(\"string\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Alterar livro",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/{{livroId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"{{livroId}}"
+							]
+						},
+						"description": "Troca o autor. Como generoId é enviado, o gênero continua o mesmo. Teste também sem generoId (mantém) e com null (remove).",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titulo\": \"{{tituloLivro}}\",\n  \"autor\": \"{{autorLivro}}\",\n  \"totalPaginas\": 100,\n  \"generoId\": {{generoId}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.collectionVariables.set(\"autorLivro\", \"Autor Editado\");"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Autor atualizado\", () => pm.expect(pm.response.json().livro.autor).to.eql(\"Autor Editado\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Enviar capa (multipart)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/{{livroId}}/capa",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"{{livroId}}",
+								"capa"
+							]
+						},
+						"description": "ANTES DE ENVIAR: na aba Body, na linha 'capa', clique em 'Select Files' e escolha uma imagem JPG, PNG ou WEBP de até 2 MB.",
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "capa",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"capa_url aponta para /uploads\", () => pm.expect(pm.response.json().livro.capa_url).to.match(/^\\/uploads\\//));"
+								]
+							}
 						}
 					]
 				}
 			]
+		},
+		{
+			"name": "4 - Leituras",
+			"item": [
+				{
+					"name": "POST Adicionar livro à lista (LENDO)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"livroId\": {{livroId}},\n  \"status\": \"LENDO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+									"const j = pm.response.json();",
+									"pm.test(\"Leitura criada como LENDO\", () => {",
+									"  pm.expect(j.message).to.eql(\"Livro adicionado à sua lista!\");",
+									"  pm.expect(j.leitura.status).to.eql(\"LENDO\");",
+									"});",
+									"pm.collectionVariables.set(\"leituraId\", j.leitura.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Listar leituras",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Lista contém a leitura criada\", () => pm.expect(pm.response.json().some(l => l.id === Number(pm.collectionVariables.get(\"leituraId\")))).to.be.true);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Listar leituras filtrando por status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras?status=LENDO",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "LENDO"
+								}
+							]
+						},
+						"description": "Status aceitos: QUERO_LER, LENDO, LIDO e ABANDONADO."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Todas as leituras são LENDO\", () => pm.response.json().forEach(l => pm.expect(l.status).to.eql(\"LENDO\")));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Leitura por id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras/{{leituraId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras",
+								"{{leituraId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"const j = pm.response.json();",
+									"pm.test(\"Vem com dados do livro e porcentagem\", () => {",
+									"  pm.expect(j.titulo).to.eql(pm.collectionVariables.get(\"tituloLivro\"));",
+									"  pm.expect(j.porcentagem).to.eql(0);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PATCH Progresso parcial (50 de 100 páginas)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras/{{leituraId}}/progresso",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras",
+								"{{leituraId}}",
+								"progresso"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paginasLidas\": 50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Continua LENDO com 50 páginas\", () => {",
+									"  const l = pm.response.json().leitura;",
+									"  pm.expect(l.paginas_lidas).to.eql(50);",
+									"  pm.expect(l.status).to.eql(\"LENDO\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PATCH Progresso final (100 de 100 páginas)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras/{{leituraId}}/progresso",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras",
+								"{{leituraId}}",
+								"progresso"
+							]
+						},
+						"description": "Ao chegar no total de páginas, o status vira LIDO e a data de fim é preenchida. Isso é necessário para criar a resenha.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paginasLidas\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Vira LIDO e ganha data de fim\", () => {",
+									"  const l = pm.response.json().leitura;",
+									"  pm.expect(l.status).to.eql(\"LIDO\");",
+									"  pm.expect(l.data_fim).to.not.be.null;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "5 - Resenhas",
+			"item": [
+				{
+					"name": "POST Criar resenha",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"leituraId\": {{leituraId}},\n  \"avaliacao\": 5,\n  \"comentario\": \"Um clássico imperdível.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+									"const j = pm.response.json();",
+									"pm.test(\"Resenha criada com dados do livro\", () => {",
+									"  pm.expect(j.message).to.eql(\"Resenha criada com sucesso!\");",
+									"  pm.expect(j.resenha.avaliacao).to.eql(5);",
+									"  pm.expect(j.resenha.titulo).to.eql(pm.collectionVariables.get(\"tituloLivro\"));",
+									"});",
+									"pm.collectionVariables.set(\"resenhaId\", j.resenha.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Listar resenhas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Lista contém a resenha criada\", () => pm.expect(pm.response.json().some(r => r.id === Number(pm.collectionVariables.get(\"resenhaId\")))).to.be.true);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Listar resenhas filtrando por nota",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas?avaliacao=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas"
+							],
+							"query": [
+								{
+									"key": "avaliacao",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Todas têm nota 5\", () => pm.response.json().forEach(r => pm.expect(r.avaliacao).to.eql(5)));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Resenha por id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas/{{resenhaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas",
+								"{{resenhaId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Id confere\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"resenhaId\"))));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Alterar resenha",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas/{{resenhaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas",
+								"{{resenhaId}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"avaliacao\": 4,\n  \"comentario\": \"Reli e gostei ainda mais.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Nota e comentário atualizados\", () => {",
+									"  const r = pm.response.json().resenha;",
+									"  pm.expect(r.avaliacao).to.eql(4);",
+									"  pm.expect(r.comentario).to.eql(\"Reli e gostei ainda mais.\");",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "6 - Metas",
+			"item": [
+				{
+					"name": "POST Criar meta do ano atual",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ano\": {{ano}},\n  \"metaLivros\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.collectionVariables.set(\"ano\", new Date().getFullYear());"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+									"const j = pm.response.json();",
+									"pm.test(\"Meta criada com progresso\", () => {",
+									"  pm.expect(j.meta.metaLivros).to.eql(10);",
+									"  pm.expect(j.meta).to.have.all.keys(\"id\",\"ano\",\"metaLivros\",\"livrosLidos\",\"faltam\",\"porcentagem\",\"concluida\",\"createdAt\");",
+									"});",
+									"pm.collectionVariables.set(\"metaId\", j.meta.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Listar metas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Lista contém a meta criada\", () => pm.expect(pm.response.json().some(m => m.id === Number(pm.collectionVariables.get(\"metaId\")))).to.be.true);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Meta por id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas/{{metaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas",
+								"{{metaId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Id confere\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"metaId\"))));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Progresso da meta de um ano",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas/ano/{{ano}}/progresso",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas",
+								"ano",
+								"{{ano}}",
+								"progresso"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Devolve o progresso do ano\", () => {",
+									"  const m = pm.response.json();",
+									"  pm.expect(m.ano).to.eql(Number(pm.collectionVariables.get(\"ano\")));",
+									"  pm.expect(m.porcentagem).to.be.a(\"number\");",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Alterar meta",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas/{{metaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas",
+								"{{metaId}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"metaLivros\": 20\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Meta atualizada para 20\", () => pm.expect(pm.response.json().meta.metaLivros).to.eql(20));"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "7 - Erros esperados",
+			"item": [
+				{
+					"name": "Login com senha errada",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"senha_errada\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+									"pm.test(\"Código de erro INVALID_CREDENTIALS\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_CREDENTIALS\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login sem password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro VALIDATION_ERROR\", () => pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login com JSON malformado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "O corpo termina com vírgula e não fecha a chave, de propósito.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"a@a.com\",",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro INVALID_JSON\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_JSON\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Cadastro com e-mail repetido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Maria Teste\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+									"pm.test(\"Código de erro EMAIL_ALREADY_EXISTS\", () => pm.expect(pm.response.json().error.code).to.eql(\"EMAIL_ALREADY_EXISTS\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Cadastro com senha curta",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Maria Teste\",\n  \"email\": \"outro@email.com\",\n  \"password\": \"123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro VALIDATION_ERROR\", () => pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Rota protegida sem token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+									"pm.test(\"Código de erro UNAUTHORIZED\", () => pm.expect(pm.response.json().error.code).to.eql(\"UNAUTHORIZED\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Rota protegida com token inválido",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							]
+						},
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "token_invalido",
+									"type": "string"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+									"pm.test(\"Código de erro UNAUTHORIZED\", () => pm.expect(pm.response.json().error.code).to.eql(\"UNAUTHORIZED\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Rota que não existe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/xyz",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"xyz"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+									"pm.test(\"Código de erro ROUTE_NOT_FOUND\", () => pm.expect(pm.response.json().error.code).to.eql(\"ROUTE_NOT_FOUND\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Livro com id inválido (abc)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/abc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"abc"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro INVALID_ID\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_ID\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Livro com id inexistente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"999999"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+									"pm.test(\"Código de erro NOT_FOUND\", () => pm.expect(pm.response.json().error.code).to.eql(\"NOT_FOUND\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Criar livro sem campos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro VALIDATION_ERROR\", () => pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Criar livro com gênero inexistente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titulo\": \"Livro Qualquer\",\n  \"autor\": \"Autor Qualquer\",\n  \"totalPaginas\": 100,\n  \"generoId\": 999999\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+									"pm.test(\"Código de erro GENERO_NOT_FOUND\", () => pm.expect(pm.response.json().error.code).to.eql(\"GENERO_NOT_FOUND\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Criar livro duplicado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros"
+							]
+						},
+						"description": "Mesmo título e autor do livro criado na pasta 3.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titulo\": \"{{tituloLivro}}\",\n  \"autor\": \"{{autorLivro}}\",\n  \"totalPaginas\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+									"pm.test(\"Código de erro LIVRO_ALREADY_EXISTS\", () => pm.expect(pm.response.json().error.code).to.eql(\"LIVRO_ALREADY_EXISTS\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Enviar capa sem arquivo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/{{livroId}}/capa",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"{{livroId}}",
+								"capa"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro FILE_REQUIRED\", () => pm.expect(pm.response.json().error.code).to.eql(\"FILE_REQUIRED\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Adicionar leitura com status inválido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"livroId\": {{livroId}},\n  \"status\": \"PAUSADO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro INVALID_STATUS\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_STATUS\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Adicionar leitura repetida",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"livroId\": {{livroId}},\n  \"status\": \"LENDO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+									"pm.test(\"Código de erro ALREADY_IN_LIST\", () => pm.expect(pm.response.json().error.code).to.eql(\"ALREADY_IN_LIST\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Filtrar leituras por status inválido",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras?status=XYZ",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "XYZ"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro INVALID_STATUS\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_STATUS\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Progresso acima do total de páginas",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras/{{leituraId}}/progresso",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras",
+								"{{leituraId}}",
+								"progresso"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paginasLidas\": 9999\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro INVALID_PAGE_COUNT\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_PAGE_COUNT\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Resenha com nota 6",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"leituraId\": {{leituraId}},\n  \"avaliacao\": 6\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro INVALID_RATING\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_RATING\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Resenha repetida para a mesma leitura",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"leituraId\": {{leituraId}},\n  \"avaliacao\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+									"pm.test(\"Código de erro RESENHA_ALREADY_EXISTS\", () => pm.expect(pm.response.json().error.code).to.eql(\"RESENHA_ALREADY_EXISTS\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Meta repetida no mesmo ano",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ano\": {{ano}},\n  \"metaLivros\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+									"pm.test(\"Código de erro META_ALREADY_EXISTS\", () => pm.expect(pm.response.json().error.code).to.eql(\"META_ALREADY_EXISTS\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Progresso de meta com ano fora do intervalo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas/ano/1800/progresso",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas",
+								"ano",
+								"1800",
+								"progresso"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Código de erro INVALID_YEAR\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_YEAR\"));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Remover livro que está em uso",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/{{livroId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"{{livroId}}"
+							]
+						},
+						"description": "Falha porque o livro ainda está na lista de leituras do usuário."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+									"pm.test(\"Código de erro LIVRO_IN_USE\", () => pm.expect(pm.response.json().error.code).to.eql(\"LIVRO_IN_USE\"));"
+								]
+							}
+						}
+					]
+				}
+			],
+			"description": "Cada requisição aqui deve falhar de propósito. O teste passa quando a API devolve o status e o código de erro corretos. Rode depois das pastas 1 a 6."
+		},
+		{
+			"name": "8 - Limpeza",
+			"item": [
+				{
+					"name": "DELETE Resenha",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/resenhas/{{resenhaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resenhas",
+								"{{resenhaId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Meta",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/metas/{{metaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"metas",
+								"{{metaId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Leitura",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leituras/{{leituraId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"leituras",
+								"{{leituraId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Livro",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/{{livroId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"{{livroId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Gênero",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/generos/{{generoId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"generos",
+								"{{generoId}}"
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Livro apagado devolve 404",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/livros/{{livroId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"livros",
+								"{{livroId}}"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+									"pm.test(\"Código de erro NOT_FOUND\", () => pm.expect(pm.response.json().error.code).to.eql(\"NOT_FOUND\"));"
+								]
+							}
+						}
+					]
+				}
+			],
+			"description": "Apaga o que as pastas anteriores criaram, na ordem certa (resenha, meta, leitura, livro, gênero)."
 		}
 	]
 }

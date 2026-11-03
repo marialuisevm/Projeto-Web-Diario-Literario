@@ -65,10 +65,11 @@ export async function create(
   status = "QUERO_LER",
   paginasLidas = 0
 ): Promise<LeituraRow> {
-  const dataInicio = status === "LENDO" ? "NOW()" : "NULL";
+  const dataInicio = status === "LENDO" || status === "LIDO" ? "NOW()" : "NULL";
+  const dataFim = status === "LIDO" ? "NOW()" : "NULL";
   const query = `
-    INSERT INTO leituras (user_id, livro_id, paginas_lidas, status, data_inicio)
-    VALUES ($1, $2, $3, $4, ${dataInicio})
+    INSERT INTO leituras (user_id, livro_id, paginas_lidas, status, data_inicio, data_fim)
+    VALUES ($1, $2, $3, $4, ${dataInicio}, ${dataFim})
     RETURNING *;
   `;
   const result = await pool.query(query, [userId, livroId, paginasLidas, status]);
@@ -84,7 +85,11 @@ export async function updateProgress(
 ): Promise<LeituraRow | null> {
   const query = `
     UPDATE leituras
-    SET paginas_lidas = $1, status = $2, data_fim = $3
+    SET paginas_lidas = $1, status = $2, data_fim = $3,
+        data_inicio = CASE
+          WHEN $2::varchar IN ('LENDO', 'LIDO') THEN COALESCE(data_inicio, CURRENT_DATE)
+          ELSE data_inicio
+        END
     WHERE id = $4 AND user_id = $5
     RETURNING *;
   `;

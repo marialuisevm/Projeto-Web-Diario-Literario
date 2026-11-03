@@ -1,0 +1,187 @@
+paths:
+  /api/generos:
+    get:
+      tags: [Gêneros]
+      summary: Lista todos os gêneros
+      security: []
+      parameters:
+        - in: query
+          name: busca
+          required: false
+          schema: { type: string }
+          description: Filtra gêneros cujo nome contém este texto (sem diferenciar maiúsculas de minúsculas)
+          example: fic
+      responses:
+        "200":
+          description: Lista de gêneros ordenada por nome
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer, example: 1 }
+                    nome: { type: string, example: Ficção }
+
+    post:
+      tags: [Gêneros]
+      summary: Cria um gênero
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome]
+              properties:
+                nome:
+                  type: string
+                  maxLength: 80
+                  example: Fantasia
+      responses:
+        "201":
+          description: Gênero criado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Gênero criado com sucesso! }
+                  genero:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 2 }
+                      nome: { type: string, example: Fantasia }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `VALIDATION_ERROR`: nome ausente, vazio ou com mais de 80 caracteres
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "409":
+          description: Já existe um gênero com este nome (`GENERO_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+  /api/generos/{id}:
+    get:
+      tags: [Gêneros]
+      summary: Busca um gênero pelo id
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do gênero
+          example: 1
+      responses:
+        "200":
+          description: Gênero encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer, example: 1 }
+                  nome: { type: string, example: Ficção }
+        "400":
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "404":
+          description: Gênero não encontrado (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    put:
+      tags: [Gêneros]
+      summary: Altera o nome de um gênero
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do gênero
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome]
+              properties:
+                nome:
+                  type: string
+                  maxLength: 80
+                  example: Ficção Científica
+      responses:
+        "200":
+          description: Gênero atualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Gênero atualizado com sucesso! }
+                  genero:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 1 }
+                      nome: { type: string, example: Ficção Científica }
+        "400":
+          description: |
+            Requisição inválida. Possíveis erros:
+            - `INVALID_ID`: o id deve ser um inteiro positivo
+            - `VALIDATION_ERROR`: nome ausente, vazio ou com mais de 80 caracteres
+            - `INVALID_JSON`: o corpo da requisição não é um JSON válido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Gênero não encontrado (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "409":
+          description: Já existe outro gênero com este nome (`GENERO_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+
+    delete:
+      tags: [Gêneros]
+      summary: Remove um gênero
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Id do gênero
+          example: 1
+      responses:
+        "204":
+          description: Gênero removido (sem corpo na resposta)
+        "400":
+          description: Id inválido, o id deve ser um inteiro positivo (`INVALID_ID`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Gênero não encontrado para remoção (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erro" }
