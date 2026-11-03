@@ -1,19 +1,6 @@
 import * as leiturasRepository from "./leituras.repository";
 import { pool } from "../db";
 import { AppError } from "../errors/AppError";
-import { isValidId } from "../utils/validators";
-
-const STATUS_VALIDOS = ["QUERO_LER", "LENDO", "LIDO", "ABANDONADO"];
-
-function validateStatus(status: string) {
-  if (!STATUS_VALIDOS.includes(status)) {
-    throw new AppError(
-      `O status deve ser um destes: ${STATUS_VALIDOS.join(", ")}.`,
-      400,
-      "INVALID_STATUS"
-    );
-  }
-}
 
 function formatLeituraComProgresso(item: leiturasRepository.LeituraRow) {
   const total = item.total_paginas ?? 1;
@@ -37,8 +24,6 @@ function formatLeituraComProgresso(item: leiturasRepository.LeituraRow) {
 }
 
 export async function listUserLeituras(userId: number, status?: string) {
-  if (status !== undefined) { validateStatus(status); }
-
   const leituras = await leiturasRepository.findByUser(userId, status);
   return leituras.map(formatLeituraComProgresso);
 }
@@ -52,13 +37,8 @@ export async function getLeituraById(id: number, userId: number) {
 }
 
 export async function addLivroParaLeitura(userId: number, livroId: number, status = "QUERO_LER") {
-  if (!isValidId(livroId)) {
-    throw new AppError("O campo livroId deve ser um número inteiro positivo.", 400, "VALIDATION_ERROR");
-  }
-  validateStatus(status);
-
   // Verifica se o livro existe no catálogo
-  const livroCheck = await pool.query("SELECT id, total_paginas FROM livros WHERE id = $1 LIMIT 1;", [livroId]);
+  const livroCheck = await pool.query("SELECT id FROM livros WHERE id = $1 LIMIT 1;", [livroId]);
   if (livroCheck.rowCount === 0) {
     throw new AppError("Livro não encontrado no catálogo.", 404, "BOOK_NOT_FOUND");
   }
@@ -69,17 +49,11 @@ export async function addLivroParaLeitura(userId: number, livroId: number, statu
     throw new AppError("Este livro já está na sua lista de leituras.", 409, "ALREADY_IN_LIST");
   }
 
-  const paginasLidas = status === "LIDO" ? (livroCheck.rows[0].total_paginas ?? 0) : 0;
-  const novaLeitura = await leiturasRepository.create(userId, livroId, status, paginasLidas);
-
+  const novaLeitura = await leiturasRepository.create(userId, livroId, status);
   return novaLeitura;
 }
 
 export async function updateProgress(id: number, userId: number, paginasLidas: number) {
-  if (!Number.isInteger(paginasLidas)) {
-    throw new AppError("As páginas lidas devem ser um número inteiro.", 400, "INVALID_PAGE_COUNT");
-  }
-  
   const leituraAtual = await leiturasRepository.findById(id, userId);
   if (!leituraAtual) {
     throw new AppError("Registro de leitura não encontrado.", 404, "NOT_FOUND");
