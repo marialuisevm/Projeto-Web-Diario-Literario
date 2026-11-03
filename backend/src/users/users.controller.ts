@@ -6,10 +6,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
   try {
     const { name, email, password } = req.body;
 
-    if (
-      typeof name !== "string" || typeof email !== "string" || typeof password !== "string" ||
-      !name.trim() || !email.trim() || !password
-    ) {
+    if (!name || !email || !password) {
       return next(new AppError("Campos obrigatórios: name, email e password.", 400, "VALIDATION_ERROR"));
     }
 

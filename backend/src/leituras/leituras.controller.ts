@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as leiturasService from "./leituras.service";
 import { AppError } from "../errors/AppError";
-import { isValidId } from "../utils/validators";
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
@@ -20,7 +19,7 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
     const userId = (req as any).userId;
     const id = Number(req.params.id);
 
-    if (!isValidId(id)) {
+    if (isNaN(id)) {
       return next(new AppError("ID de leitura inválido.", 400, "INVALID_ID"));
     }
 
@@ -61,7 +60,7 @@ export async function updateProgresso(req: Request, res: Response, next: NextFun
     const id = Number(req.params.id);
     const { paginasLidas } = req.body;
 
-    if (!isValidId(id) || paginasLidas === undefined) {
+    if (isNaN(id) || paginasLidas === undefined) {
       return next(new AppError("Informe o ID e a quantidade de paginasLidas.", 400, "VALIDATION_ERROR"));
     }
 
@@ -81,7 +80,7 @@ export async function remove(req: Request, res: Response, next: NextFunction) {
     const userId = (req as any).userId;
     const id = Number(req.params.id);
 
-    if (!isValidId(id)) {
+    if (isNaN(id)) {
       return next(new AppError("ID de leitura inválido.", 400, "INVALID_ID"));
     }
 
