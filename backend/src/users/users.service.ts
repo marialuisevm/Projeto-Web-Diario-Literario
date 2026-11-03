@@ -9,19 +9,29 @@ export interface RegisterDTO {
 }
 
 export async function register(data: RegisterDTO) {
+  
+  const name = data.name.trim();
+  const email = data.email.trim();
+
+  if (name.length > 100) {
+    throw new AppError("O nome deve ter no máximo 100 caracteres.", 400, "VALIDATION_ERROR");
+  }
+  if (email.length > 200) {
+    throw new AppError("O e-mail deve ter no máximo 200 caracteres.", 400, "VALIDATION_ERROR");
+  }
   if (!data.password || data.password.length < 6) {
-    throw new AppError("A palavra-passe deve ter pelo menos 6 caracteres.", 400, "VALIDATION_ERROR");
+    throw new AppError("A senha deve ter pelo menos 6 caracteres.", 400, "VALIDATION_ERROR");
   }
 
   const userExists = await usersRepository.findByEmail(data.email);
   if (userExists) {
-    throw new AppError("Este e-mail já se encontra registado.", 409, "EMAIL_ALREADY_EXISTS");
+    throw new AppError("Este e-mail já se encontra cadastrado.", 409, "EMAIL_ALREADY_EXISTS");
   }
 
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(data.password, saltRounds);
 
-  const newUser = await usersRepository.create(data.name, data.email, passwordHash);
+  const newUser = await usersRepository.create(name, email, passwordHash);
 
   return {
     id: newUser.id,
@@ -34,7 +44,7 @@ export async function register(data: RegisterDTO) {
 export async function getProfile(userId: number) {
   const user = await usersRepository.findById(userId);
   if (!user) {
-    throw new AppError("Utilizador não encontrado.", 404, "NOT_FOUND");
+    throw new AppError("Usuário não encontrado.", 404, "NOT_FOUND");
   }
 
   return {
